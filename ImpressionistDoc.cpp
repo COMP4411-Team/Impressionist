@@ -355,6 +355,7 @@ void ImpressionistDoc::initBackground()
 }
 
 void ImpressionistDoc::autoPaint() {
+	/*
 	int Osize = getSize();
 	Point tsource(0, 0);
 	Point ttarget(0, 0);
@@ -375,6 +376,11 @@ void ImpressionistDoc::autoPaint() {
 		}
 	}
 	m_pUI->setSize(Osize);
+	*/
+	m_pUI->m_paintView->enableAutoPaint = true;
+	m_pUI->m_paintView->spacing = spacing;
+	m_pUI->m_paintView->sizeRand = sizeRand;
+	m_pUI->m_paintView->refresh();
 }
 
 bool ImpressionistDoc::pixelsEqual(unsigned char* a, unsigned char* b)

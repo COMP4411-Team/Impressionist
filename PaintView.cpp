@@ -27,6 +27,8 @@
 
 const double PI = std::acos(-1);
 
+extern float frand();
+
 static int		eventToDo;
 static int		isAnEvent=0;
 static Point	coord;
@@ -95,7 +97,6 @@ void PaintView::draw()
 	m_nStartCol		= scrollpos.x;
 	m_nEndCol		= m_nStartCol + drawWidth;
 	
-	
 	if ( m_pDoc->m_ucPainting && !isAnEvent) 
 	{
 		RestoreContent();
@@ -163,6 +164,12 @@ void PaintView::draw()
 			printf("Unknown event!!\n");		
 			break;
 		}
+	}
+
+	if (enableAutoPaint)
+	{
+		autoPaint();
+		enableAutoPaint = false;
 	}
 
 	glFlush();
@@ -343,6 +350,24 @@ void PaintView::backupCanvas()
 bool PaintView::pixelEqual(GLubyte* a, GLubyte* b)
 {
 	return a[0] == b[0] && a[1] == b[1] && a[2] == b[2];
+}
+
+void PaintView::autoPaint()
+{
+	int Osize = m_pDoc->getSize();
+
+	for(int i = 0; i < m_nDrawWidth; i += spacing){
+		for (int j = 0; j < m_nDrawHeight; j += spacing) {
+			if (sizeRand) {
+				float temp = frand()  + 0.5;
+				m_pDoc->m_pUI->setSize(temp*Osize);
+			}
+			m_pDoc->m_pCurrentBrush->BrushBegin(Point(i, j), Point(i, j));
+		}
+	}
+	m_pDoc->m_pUI->setSize(Osize);
+
+	refresh();
 }
 
 bool PaintView::isInCanvas(const Point& target)

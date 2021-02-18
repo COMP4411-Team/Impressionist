@@ -44,6 +44,10 @@ public:
 	int getWindowWidth();
 	int getWindowHeight();
 
+	int spacing;
+	bool sizeRand;
+	bool enableAutoPaint;
+
 	ImpressionistDoc *m_pDoc;
 
 private:
@@ -71,6 +75,8 @@ private:
 
 	void backupCanvas();
 	bool pixelEqual(GLubyte* a, GLubyte* b);
+
+	void autoPaint();
 };
 
 #endif
