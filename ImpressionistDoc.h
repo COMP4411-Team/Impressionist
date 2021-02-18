@@ -39,7 +39,7 @@ public:
 	int		getSize();						// get the UI size
 	void	setSize(int size);				// set the UI size
 	int getWidth();
-	int getAngel();
+	int getAngle();
 	double getAlpha();
 	char*	getImageName();					// get the current image name
 	
@@ -67,6 +67,9 @@ public:
 
 	ImpressionistUI*	m_pUI;
 
+	int spacing;   //spacing for autopainting.
+	bool sizeRand = FALSE; //whether use random size for autopainting.
+
 // Operations
 public:
 	// Get the color of the original picture at the specified coord
@@ -80,6 +83,8 @@ public:
 	void swapCanvasAndOrigin();
 
 	void initBackground();
+
+	void autoPaint();
 
 private:
 	char			m_imageName[256];

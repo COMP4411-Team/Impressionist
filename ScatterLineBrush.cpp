@@ -37,7 +37,7 @@ void ScatterLineBrush::BrushMove(const Point source, const Point target)
         if (pDoc->m_strokeDirection == StrokeDirection::GRADIENT)    
             setAngleToGradient(pDoc, Point(source.x + x, source.y + y));
         drawLine(Point(source.x + x, source.y + y), Point(target.x + x, target.y + y),
-                 len, pDoc->getWidth(), pDoc->getAngel());
+                 len, pDoc->getWidth(), pDoc->getAngle());
     }
 }
 

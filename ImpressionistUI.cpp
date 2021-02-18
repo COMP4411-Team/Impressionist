@@ -353,6 +353,26 @@ void ImpressionistUI::cb_undo(Fl_Widget* o, void* v)
 	whoami(o)->m_paintView->undo();
 }
 
+void ImpressionistUI::cb_space(Fl_Widget* o, void* v) {
+	((ImpressionistUI*)(o->user_data()))->m_nSpacing = int(((Fl_Slider*)o)->value());
+}
+
+void ImpressionistUI::cb_sizeRand(Fl_Widget* o, void* v) {
+	ImpressionistUI* pUI = ((ImpressionistUI*)(o->user_data()));
+	ImpressionistDoc* pDoc = pUI->getDocument();
+
+	if (pDoc->sizeRand == TRUE) pDoc->sizeRand = FALSE;
+	else pDoc->sizeRand = TRUE;
+}
+
+void ImpressionistUI::cb_autoPaint(Fl_Widget* o, void* v)
+{
+	ImpressionistUI* pUI = ((ImpressionistUI*)(o->user_data()));
+	ImpressionistDoc* pDoc = pUI->getDocument();
+	pDoc->spacing = pUI->m_nSpacing;
+	pDoc->autoPaint();
+}
+
 void ImpressionistUI::cb_colors(Fl_Menu_* o, void* v)
 {
 	whoami(o)->m_colorDialog->show();
@@ -667,9 +687,11 @@ ImpressionistUI::ImpressionistUI() {
 	m_nWidth = 1;
 	m_nAngle = 0;
 	m_nAlpha = 1.0;
+	m_nSpacing = 1;
+	
 
 	// brush dialog definition
-	m_brushDialog = new Fl_Window(400, 325, "Brush Dialog");
+	m_brushDialog = new Fl_Window(400, 400, "Brush Dialog");
 		// Add a brush type choice to the dialog
 		m_BrushTypeChoice = new Fl_Choice(50,10,150,25,"&Brush");
 		m_BrushTypeChoice->user_data((void*)(this));	// record self to be used by static callback functions
@@ -760,6 +782,28 @@ ImpressionistUI::ImpressionistUI() {
 		m_undo = new Fl_Button(200, 240, 40, 25, "Undo");
 		m_undo->user_data((void*)this);
 		m_undo->callback(cb_undo);
+
+		m_spacingSlider = new Fl_Value_Slider(10, 320, 150, 20, "Spacing");
+		m_spacingSlider->user_data((void*)(this));	// record self to be used by static callback functions
+		m_spacingSlider->type(FL_HOR_NICE_SLIDER);
+		m_spacingSlider->labelfont(FL_COURIER);
+		m_spacingSlider->labelsize(12);
+		m_spacingSlider->minimum(1);
+		m_spacingSlider->maximum(16);
+		m_spacingSlider->step(1);
+		m_spacingSlider->value(m_nSpacing);
+		m_spacingSlider->align(FL_ALIGN_RIGHT);
+		m_spacingSlider->callback(cb_space);
+
+		m_sizeRand = new Fl_Light_Button(220, 320, 90, 20, "Size Rand");
+		m_sizeRand->user_data((void*)(this));   // record self to be used by static callback functions
+		m_sizeRand->callback(cb_sizeRand);
+
+		m_autoPaint = new Fl_Button(330, 320, 50, 20, "Paint");
+		m_autoPaint->user_data((void*)this);
+		m_autoPaint->callback(cb_autoPaint);
+
+
 
     m_brushDialog->end();
 

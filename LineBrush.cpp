@@ -35,7 +35,7 @@ void LineBrush::BrushMove(const Point source, const Point target)
 
 	if (pDoc->m_strokeDirection == StrokeDirection::GRADIENT) setAngleToGradient(pDoc, source);
 	
-	drawLine(source, target, pDoc->getSize(), pDoc->getWidth(), pDoc->getAngel());
+	drawLine(source, target, pDoc->getSize(), pDoc->getWidth(), pDoc->getAngle());
 }
 
 void LineBrush::BrushEnd(const Point source, const Point target)

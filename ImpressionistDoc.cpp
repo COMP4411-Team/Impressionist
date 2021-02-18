@@ -24,6 +24,8 @@
 
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
 
+extern float frand();
+
 ImpressionistDoc::ImpressionistDoc() 
 {
 	// Set NULL image name as init. 
@@ -103,7 +105,7 @@ int ImpressionistDoc::getWidth()
     return m_pUI->getWidth();
 }
 
-int ImpressionistDoc::getAngel()
+int ImpressionistDoc::getAngle()
 {
     return m_pUI->getAngle();
 }
@@ -253,10 +255,10 @@ int ImpressionistDoc::dissolveImage(char *name)
 	delete [] data;
 
 	m_pUI->m_origView->refresh();
-	m_pUI->m_paintView->setBackground();
-	m_pUI->m_paintView->refresh();
+m_pUI->m_paintView->setBackground();
+m_pUI->m_paintView->refresh();
 
-	return 1;
+return 1;
 }
 
 
@@ -265,7 +267,7 @@ int ImpressionistDoc::dissolveImage(char *name)
 // This is called by the UI when the save image menu button is 
 // pressed.
 //----------------------------------------------------------------
-int ImpressionistDoc::saveImage(char *iname) 
+int ImpressionistDoc::saveImage(char* iname)
 {
 
 	writeBMP(iname, m_nPaintWidth, m_nPaintHeight, m_ucPainting);
@@ -278,51 +280,51 @@ int ImpressionistDoc::saveImage(char *iname)
 // This is called by the UI when the clear canvas menu item is 
 // chosen
 //-----------------------------------------------------------------
-int ImpressionistDoc::clearCanvas() 
+int ImpressionistDoc::clearCanvas()
 {
 
 	// Release old storage
-	if ( m_ucPainting ) 
+	if (m_ucPainting)
 	{
-		delete [] m_ucPainting;
+		delete[] m_ucPainting;
 
 		// allocate space for draw view
-		m_ucPainting	= new unsigned char [m_nPaintWidth*m_nPaintHeight*3];
-		memset(m_ucPainting, 0, m_nPaintWidth*m_nPaintHeight*3);
+		m_ucPainting = new unsigned char[m_nPaintWidth * m_nPaintHeight * 3];
+		memset(m_ucPainting, 0, m_nPaintWidth * m_nPaintHeight * 3);
 
 		initBackground();
-		
+
 		// refresh paint view as well	
 		m_pUI->m_paintView->refresh();
 	}
-	
+
 	return 0;
 }
 
 //------------------------------------------------------------------
 // Get the color of the pixel in the original image at coord x and y
 //------------------------------------------------------------------
-GLubyte* ImpressionistDoc::GetOriginalPixel( int x, int y )
+GLubyte* ImpressionistDoc::GetOriginalPixel(int x, int y)
 {
-	if ( x < 0 ) 
+	if (x < 0)
 		x = 0;
-	else if ( x >= m_nWidth ) 
-		x = m_nWidth-1;
+	else if (x >= m_nWidth)
+		x = m_nWidth - 1;
 
-	if ( y < 0 ) 
+	if (y < 0)
 		y = 0;
-	else if ( y >= m_nHeight ) 
-		y = m_nHeight-1;
+	else if (y >= m_nHeight)
+		y = m_nHeight - 1;
 
-	return (GLubyte*)(m_ucBitmap + 3 * (y*m_nWidth + x));
+	return (GLubyte*)(m_ucBitmap + 3 * (y * m_nWidth + x));
 }
 
 //----------------------------------------------------------------
 // Get the color of the pixel in the original image at point p
 //----------------------------------------------------------------
-GLubyte* ImpressionistDoc::GetOriginalPixel( const Point p )
+GLubyte* ImpressionistDoc::GetOriginalPixel(const Point p)
 {
-	return GetOriginalPixel( p.x, p.y );
+	return GetOriginalPixel(p.x, p.y);
 }
 
 void ImpressionistDoc::writePixel(int x, int y, GLubyte* pixel)
@@ -342,14 +344,37 @@ void ImpressionistDoc::swapCanvasAndOrigin()
 
 void ImpressionistDoc::initBackground()
 {
-	if (m_background) delete [] m_background;
-	m_background = new unsigned char [m_nHeight * m_nWidth * 3];
-	
+	if (m_background) delete[] m_background;
+	m_background = new unsigned char[m_nHeight * m_nWidth * 3];
+
 	memcpy(m_ucPainting, m_ucBitmap, m_nWidth * m_nHeight * 3);
 	for (int i = 0; i < m_nWidth * m_nHeight * 3; ++i)
 		m_ucPainting[i] *= m_pUI->getTransparency();
 
 	memcpy(m_background, m_ucPainting, m_nWidth * m_nHeight * 3);
+}
+
+void ImpressionistDoc::autoPaint() {
+	int Osize = getSize();
+	Point tsource(0, 0);
+	Point ttarget(0, 0);
+
+	for(int i = 0; i < m_nWidth; i += spacing){
+		for (int j = 0; j < m_nHeight; j += spacing) {
+			if (sizeRand) {
+				float temp = frand()  + 0.5;
+				m_pUI->setSize(temp*Osize);
+			}
+			tsource.x = i;
+			tsource.y = m_nPaintHeight - j; 
+			ttarget.x = i;
+			ttarget.y = m_nHeight - j;
+			m_pCurrentBrush->BrushBegin(tsource, ttarget);
+			glFlush();
+			m_pUI->m_paintView->refresh();
+		}
+	}
+	m_pUI->setSize(Osize);
 }
 
 bool ImpressionistDoc::pixelsEqual(unsigned char* a, unsigned char* b)

@@ -46,6 +46,11 @@ public:
 	Fl_Slider* m_BrushAlphaSlider;
 	Fl_Slider* m_transparencySlider;
 
+	// automatically painting
+	Fl_Slider*			m_spacingSlider;
+	Fl_Light_Button*	m_sizeRand;
+	Fl_Button*			m_autoPaint;
+
 	// Painterly sliders
 	Fl_Slider* p_thresholdSlider;
 	Fl_Slider* p_layerSlider;
@@ -126,6 +131,7 @@ private:
 	int m_nWidth;
 	int m_nAngle;
 	double m_nAlpha;
+	int		m_nSpacing;
 
 	double m_rgbScale[3] = {1.0, 1.0, 1.0};	// for color blending, each between 0 and 1
 
@@ -163,6 +169,9 @@ private:
 	static void cb_transSlides(Fl_Widget* o, void* v);
 	static void cb_swapCanvasAndOrigin(Fl_Widget* o, void* v);
 	static void cb_undo(Fl_Widget* o, void* v);
+	static void cb_space(Fl_Widget* o, void* v);
+	static void cb_sizeRand(Fl_Widget* o, void* v);
+	static void cb_autoPaint(Fl_Widget* o, void* v);
 	
 	static void cb_colors(Fl_Menu_* o, void* v);
 	static void cb_colorChooser(Fl_Widget* o, void* v);

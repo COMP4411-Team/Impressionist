@@ -107,9 +107,6 @@
     <ClInclude Include="ScatterCircleBrush.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SharpeningBrush.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="AlphaMappedBrush.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -118,6 +115,9 @@
     </ClInclude>
     <ClInclude Include="BSplines.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SharpeningBrush.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
