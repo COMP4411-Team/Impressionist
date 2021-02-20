@@ -16,6 +16,7 @@
  * References
  * https://github.com/praveenVnktsh/Bayesian-Matting
  * https://www.ctolib.com/topics-118580.html
+ * https://github.com/EpsAvlc/GreenScreenMatting/blob/master/src/bayesian_matting.cpp
  */
 
 #pragma once
@@ -33,11 +34,11 @@ public:
 	class Pixel
 	{
 	public:
-		Pixel(Eigen::Vector3f c, float w): color(c), weight(w) { }
-		Eigen::Vector3f color;
-		float weight;
+		Pixel(Eigen::Vector3d c, double w): color(c), weight(w) { }
+		Eigen::Vector3d color;
+		double weight;
 		int cluster{0};
-		float minDist{1e5f};
+		double minDist{1e5f};
 	};
 	
 	BayesianMatting(ImpressionistDoc* doc);
@@ -45,18 +46,18 @@ public:
 	void predict();
 
 	int size{19};			// size of grid inspected
-	float sigma{8.0f};		// sigma for gaussian kernel
-	int minN{10};			// if knowns pixels in the grid is smaller than minN, continue
+	double sigma{8.0};		// sigma for gaussian kernel
+	int minN{10};			// if known pixels in the grid is smaller than minN, continue
 	int nClusters{5};		// num of clusters in k means
-	float kmeansThreshold{1e-3f};
-	int kmeansMaxIter{30};
-	int optimizerMaxIter{100};
-	float optimizerThreshold{1e-3f};
-	float sigmaC{3.f};
+	double kmeansThreshold{1e-3};
+	int kmeansMaxIter{20};
+	int optimizerMaxIter{50};
+	double optimizerThreshold{1e-3};
+	double sigmaC{3.0};
 	int passThreshold{5};	// if more passes than passThreshold are needed, increase the sliding window size
 
 private:
-	Eigen::MatrixXf getGaussianFilter();
+	void getGaussianFilter();
 
 	void getNeighbour(Point& coords);
 	
@@ -66,13 +67,13 @@ private:
 	
 	void getUnknowns();
 
-	void optimize(Eigen::Vector3f color, Eigen::Vector3f fgMean, Eigen::Vector3f bgMean, Eigen::Matrix3f fgCov, Eigen::Matrix3f bgCov);
+	void optimize(Eigen::Vector3d color, Eigen::Vector3d fgMean, Eigen::Vector3d bgMean, Eigen::Matrix3d fgCov, Eigen::Matrix3d bgCov);
 
-	std::pair<Eigen::Vector3f, Eigen::Matrix3f> getMeanAndCov(std::vector<Pixel>& cluster);
+	std::pair<Eigen::Vector3d, Eigen::Matrix3d> getMeanAndCov(std::vector<Pixel>& cluster);
 
 	void display();
 
-	void setPaintColor(int row, int col, Eigen::Vector3f& color);
+	void setPaintColor(int row, int col, Eigen::Vector3d& color);
 	
 	ImpressionistDoc* doc;
 
@@ -80,16 +81,17 @@ private:
 	
 	std::vector<Point> unknowns;
 
-	Eigen::MatrixXi mask;	// 0 for unknown, 1 for determined
+	Eigen::MatrixXi mask;	// 0 for unknown, 1 for background, 2 for foreground, 3 for predicted
+	Eigen::MatrixXd gaussianFilter;
 
 	// row first
-	std::vector<std::vector<Eigen::Vector3f>> foreground, background;
-	std::vector<std::vector<float>> alpha;
+	std::vector<std::vector<Eigen::Vector3d>> foreground, background;
+	std::vector<std::vector<double>> alpha;
 
 	std::vector<Pixel> fgPixels, bgPixels;
-	float alphaMean;
+	double alphaMean;
 
-	Eigen::Vector3f optimumF, optimumB;
-	float optimumAlpha, maxLikelihood{std::numeric_limits<float>::lowest()};
+	Eigen::Vector3d optimumF, optimumB;
+	double optimumAlpha, maxLikelihood{std::numeric_limits<double>::lowest()};
 };
 

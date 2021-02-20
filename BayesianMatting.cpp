@@ -16,6 +16,7 @@
  * References
  * https://github.com/praveenVnktsh/Bayesian-Matting
  * https://www.ctolib.com/topics-118580.html
+ * https://github.com/EpsAvlc/GreenScreenMatting/blob/master/src/bayesian_matting.cpp
  */
 
 #include "BayesianMatting.h"
@@ -28,9 +29,9 @@ using namespace Eigen;
 extern float frand();
 
 BayesianMatting::BayesianMatting(ImpressionistDoc* doc): doc(doc), height(doc->m_nPaintHeight), width(doc->m_nPaintWidth),
-	foreground(std::vector<std::vector<Vector3f>>(height, std::vector<Vector3f>(width, {0.f, 0.f, 0.f}))),
-	background(std::vector<std::vector<Vector3f>>(height, std::vector<Vector3f>(width, {0.f, 0.f, 0.f}))),
-	alpha(std::vector<std::vector<float>>(height, std::vector<float>(width, 0.f))),
+	foreground(std::vector<std::vector<Vector3d>>(height, std::vector<Vector3d>(width, {0.0, 0.0, 0.0}))),
+	background(std::vector<std::vector<Vector3d>>(height, std::vector<Vector3d>(width, {0.0, 0.0, 0.0}))),
+	alpha(std::vector<std::vector<double>>(height, std::vector<double>(width, 0.0))),
 	mask(MatrixXi::Zero(height, width))
 {
 	/*
@@ -51,37 +52,37 @@ void BayesianMatting::getUnknowns()
 				unknowns.emplace_back(j, i);
 }
 
-void BayesianMatting::optimize(Vector3f color, Vector3f fgMean, Vector3f bgMean, Matrix3f fgCov, Matrix3f bgCov)
+void BayesianMatting::optimize(Vector3d color, Vector3d fgMean, Vector3d bgMean, Matrix3d fgCov, Matrix3d bgCov)
 {
-	float curAlpha = alphaMean, prevLikelihood = 0.f, sigmaC2 = sigmaC * sigmaC;
-	Matrix3f fgCovInv = fgCov.inverse(), bgCovInv = bgCov.inverse();
+	double curAlpha = alphaMean, prevLikelihood = std::numeric_limits<double>::lowest(), sigmaC2 = sigmaC * sigmaC;
+	Matrix3d fgCovInv = fgCov.inverse(), bgCovInv = bgCov.inverse();
 	
 	for (int i = 0; i < optimizerMaxIter; ++i)
 	{
 		// Optimize F and B
-		MatrixXf A(6, 6);
-		VectorXf b(6);
+		MatrixXd A(6, 6);
+		VectorXd b(6);
 
-		A.block<3, 3>(0, 0) = fgCovInv + Matrix3f::Identity() * curAlpha * curAlpha / sigmaC2;
-		A.block<3, 3>(0, 3) = Matrix3f::Identity() * curAlpha * (1 - curAlpha) / sigmaC2;
+		A.block<3, 3>(0, 0) = fgCovInv + Matrix3d::Identity() * curAlpha * curAlpha / sigmaC2;
+		A.block<3, 3>(0, 3) = Matrix3d::Identity() * curAlpha * (1 - curAlpha) / sigmaC2;
 		A.block<3, 3>(3, 0) = A.block<3, 3>(0, 3);
-		A.block<3, 3>(3, 3) = bgCovInv + Matrix3f::Identity() * std::pow(1 - curAlpha, 2) / sigmaC2;
+		A.block<3, 3>(3, 3) = bgCovInv + Matrix3d::Identity() * (1 - curAlpha) * (1 - curAlpha) / sigmaC2;
 
 		b.segment(0, 3) = fgCovInv * fgMean + color * curAlpha / sigmaC2;
 		b.segment(3, 3) = bgCovInv * bgMean + color * (1 - curAlpha) / sigmaC2;
 
-		VectorXf x = A.colPivHouseholderQr().solve(b);
+		VectorXd x = A.colPivHouseholderQr().solve(b);
 
-		Vector3f F = x.segment(0, 3), B = x.segment(3, 3);
+		Vector3d F = x.segment(0, 3), B = x.segment(3, 3);
 
 		// Optimize alpha
 		curAlpha = (color - B).dot(F - B) / (F - B).squaredNorm();
 
-		curAlpha = max(0.f, curAlpha);
-		curAlpha = min(1.f, curAlpha);
+		curAlpha = max(0.0, curAlpha);
+		curAlpha = min(1.0, curAlpha);
 		
 		// Calculate likelihood
-		float curLikelihood = -(color - curAlpha * F - (1 - curAlpha) * B).squaredNorm() / sigmaC2;
+		double curLikelihood = -(color - curAlpha * F - (1 - curAlpha) * B).squaredNorm() / sigmaC2;
 		curLikelihood -= ((F - fgMean).transpose() * fgCovInv * (F - fgMean) / 2).sum();		// degenerate to 1x1 mat
 		curLikelihood -= ((B - bgMean).transpose() * bgCovInv * (B - bgMean) / 2).sum();
 
@@ -114,6 +115,9 @@ void BayesianMatting::predict()
 			if (fgPixels.size() < minN || bgPixels.size() < minN)
 				continue;
 
+			auto oriPixel = doc->GetOriginalPixel(point);
+			Vector3d color(oriPixel[0], oriPixel[1], oriPixel[2]);
+
 			kmeans(fgPixels);
 			kmeans(bgPixels);
 
@@ -125,7 +129,7 @@ void BayesianMatting::predict()
 			for (auto& pixel : bgPixels)
 				bgClusters[pixel.cluster].push_back(pixel);
 
-			maxLikelihood = std::numeric_limits<float>::lowest();
+			maxLikelihood = std::numeric_limits<double>::lowest();
 
 			for (int i = 0; i < nClusters; ++i)
 			{
@@ -133,6 +137,10 @@ void BayesianMatting::predict()
 					continue;
 
 				auto fg = getMeanAndCov(fgClusters[i]);
+
+				if (isnan(fg.first(0)) || isnan(fg.second(0, 0)))
+					continue;
+				
 				if (!fg.second.fullPivLu().isInvertible())
 					continue;
 				
@@ -145,20 +153,20 @@ void BayesianMatting::predict()
 					if (!bg.second.fullPivLu().isInvertible())
 						continue;
 
-					auto oriPixel = doc->GetOriginalPixel(point);
-					Vector3f color(oriPixel[0], oriPixel[1], oriPixel[2]);
+					if (isnan(bg.first(0)) || isnan(bg.second(0, 0)))
+						continue;
 					
 					optimize(color, fg.first, bg.first, fg.second, bg.second);
 				}
 			}
 
-			if (maxLikelihood > std::numeric_limits<float>::lowest())
+			if (maxLikelihood > std::numeric_limits<double>::lowest())
 			{
 				int x = point.x, y = point.y;
 				foreground[y][x] = optimumF;
 				background[y][x] = optimumB;
 				alpha[y][x] = optimumAlpha;
-				mask(y, x) = 1;
+				mask(y, x) = 3;
 				++count;
 			}
 
@@ -184,7 +192,7 @@ void BayesianMatting::predict()
 void BayesianMatting::kmeans(std::vector<Pixel>& input)
 {
 	int count = 0;
-	std::vector<Vector3f> clusters;
+	std::vector<Vector3d> clusters;
 	for (int i = 0; i < nClusters; ++i)
 	{
 		clusters.push_back(input[frand() * (input.size() - 1)].color);
@@ -193,7 +201,7 @@ void BayesianMatting::kmeans(std::vector<Pixel>& input)
 	while(count++ < kmeansMaxIter)
 	{
 		bool flag = false;
-		std::vector<Vector3f> means;
+		std::vector<Vector3d> means;
 		for (int i = 0; i < nClusters; ++i)
 			means.emplace_back(0.f, 0.f, 0.f);
 		
@@ -201,7 +209,7 @@ void BayesianMatting::kmeans(std::vector<Pixel>& input)
 		{
 			for (int i = 0; i < nClusters; ++i)
 			{
-				float dist = (pixel.color - clusters[i]).norm();
+				double dist = (pixel.color - clusters[i]).norm();
 				if (dist < pixel.minDist)
 				{
 					pixel.minDist = dist;
@@ -213,7 +221,7 @@ void BayesianMatting::kmeans(std::vector<Pixel>& input)
 
 		for (int i = 0; i < nClusters; ++i)
 		{
-			float dist = (clusters[i] - means[i]).norm();
+			double dist = (clusters[i] - means[i]).norm();
 			if (dist > kmeansThreshold)
 			{
 				flag = true;
@@ -235,18 +243,18 @@ void BayesianMatting::preprocessTrimap()
 			int index = (i * width + j) * 3;
 			int sum = trimap[index] + trimap[index + 1] + trimap[index + 2];
 
-			if (!sum)
+			if (!sum)	// background
 			{
 				mask(i, j) = 1;
 				unsigned char* color = doc->GetOriginalPixel(j, i);
-				background[i][j] = {(float)color[0], (float)color[1], (float)color[2]};
+				background[i][j] = {(double)color[0], (double)color[1], (double)color[2]};
 			}
-			else if (sum == 255 * 3)
+			else if (sum == 255 * 3)		// foreground
 			{
-				mask(i, j) = 1;
+				mask(i, j) = 2;
 				unsigned char* color = doc->GetOriginalPixel(j, i);
-				foreground[i][j] = {(float)color[0], (float)color[1], (float)color[2]};
-				alpha[i][j] = 1.f;
+				foreground[i][j] = {(double)color[0], (double)color[1], (double)color[2]};
+				alpha[i][j] = 1.0;
 			}
 		}
 
@@ -257,12 +265,12 @@ void BayesianMatting::preprocessTrimap()
 	 */
 }
 
-std::pair<Eigen::Vector3f, Eigen::Matrix3f> BayesianMatting::getMeanAndCov(std::vector<Pixel>& cluster)
+std::pair<Eigen::Vector3d, Eigen::Matrix3d> BayesianMatting::getMeanAndCov(std::vector<Pixel>& cluster)
 {
-	Vector3f mean(0, 0, 0);
-	Matrix3f cov = Matrix3f::Zero();
+	Vector3d mean(0, 0, 0);
+	Matrix3d cov = Matrix3d::Zero();
 
-	float totalWeight = 0.f;
+	double totalWeight = 0;
 
 	for (auto& pixel : cluster)
 	{
@@ -272,11 +280,11 @@ std::pair<Eigen::Vector3f, Eigen::Matrix3f> BayesianMatting::getMeanAndCov(std::
 
 	for (auto& pixel : cluster)
 	{
-		Vector3f delta = pixel.color - mean;
+		Vector3d delta = pixel.color - mean;
 		cov += pixel.weight * delta * delta.transpose();
 	}
 	
-	return {mean / totalWeight, cov / totalWeight};
+	return {mean / totalWeight, cov / totalWeight + Matrix3d::Identity() * 1e-5};
 }
 
 void BayesianMatting::display()
@@ -285,35 +293,32 @@ void BayesianMatting::display()
 	memset(paint, 0, height * width * 3);
 
 	/*
-	Vector3f white{255.f, 255.f, 255.f};
-	Vector3f grey{127.f, 127.f, 127.f};
-	Vector3f black{0.f, 0.f, 0.f};
+	Vector3d white{255.f, 255.f, 255.f};
+	Vector3d grey{127.f, 127.f, 127.f};
+	Vector3d black{0.f, 0.f, 0.f};
 	 */
 	
 	for (int i = 0; i < height; ++i)
 		for (int j = 0; j < width; ++j)
 		{
 			// int index = (i * width + j) * 3;
-			/*
-			Vector3f& color = foreground[i][j];
+			
+			/*Vector3d& color = foreground[i][j];
 			paint[index] = color(0);
 			paint[index + 1] = color(1);
-			paint[index + 2] = color(2);
-			*/
+			paint[index + 2] = color(2);*/
 			
 			setPaintColor(i, j, foreground[i][j]);
-
-			/*
-			float curAlpha = alpha[i][j] * 255;
-			Vector3f greyScale(curAlpha, curAlpha, curAlpha);
-			setPaintColor(i, j, greyScale);
-			 */
+			
+			/*double curAlpha = alpha[i][j] * 255;
+			Vector3d greyScale(curAlpha, curAlpha, curAlpha);
+			setPaintColor(i, j, greyScale);*/
 		}
 
 	doc->m_pUI->m_paintView->refresh();
 }
 
-void BayesianMatting::setPaintColor(int row, int col, Eigen::Vector3f& color)
+void BayesianMatting::setPaintColor(int row, int col, Eigen::Vector3d& color)
 {
 	auto* paint = doc->m_ucPainting;
 	int index = (row * width + col) * 3; 
@@ -322,20 +327,20 @@ void BayesianMatting::setPaintColor(int row, int col, Eigen::Vector3f& color)
 	paint[index + 2] = color(2);
 }
 
-Eigen::MatrixXf BayesianMatting::getGaussianFilter()
+void BayesianMatting::getGaussianFilter()
 {
-	MatrixXf kernel(size, size);
-    float sum = 0.0, sigma2 = sigma * sigma;
+	gaussianFilter = MatrixXd::Zero(size, size);
+    double sum = 0.0, sigma2 = sigma * sigma;
     
     for (int i = 0; i < size; i++) 
         for (int j = 0; j < size; j++) 
 		{
         		int x = j - size / 2, y = i - size / 2;
-            kernel(i, j) = std::exp(-(x * x + y * y) / (2 * sigma2));
-            sum += kernel(i, j);
+            gaussianFilter(i, j) = std::exp(-(x * x + y * y) / (2 * sigma2));
+            sum += gaussianFilter(i, j);
 		}
-   
-	return kernel / sum;
+
+	gaussianFilter /= sum;
 }
 
 void BayesianMatting::getNeighbour(Point& coords)
@@ -348,10 +353,10 @@ void BayesianMatting::getNeighbour(Point& coords)
 
 	fgPixels.clear();
 	bgPixels.clear();
-	alphaMean = 0.f;
+	alphaMean = 0.0;
 	int count = 0;
 
-	auto kernel = getGaussianFilter();
+	getGaussianFilter();
 
 	for (int i = yMin; i < yMax; ++i)
 		for (int j = xMin; j < xMax; ++j)
@@ -360,21 +365,20 @@ void BayesianMatting::getNeighbour(Point& coords)
 				continue;
 			++count;
 
-			float curAlpha = alpha[i][j];
+			double curAlpha = alpha[i][j];
 
 			alphaMean += curAlpha;
-			Vector3f fgColor = foreground[i][j], bgColor = background[i][j];
+			Vector3d fgColor = foreground[i][j], bgColor = background[i][j];
 
-			float gaussianFalloff = kernel(i - coords.y + size/2, j - coords.x + size/2);
+			double gaussianFalloff = gaussianFilter(i - coords.y + size/2, j - coords.x + size/2);
 
-			if (fgColor.sum() > 0.f && curAlpha > 0.f)
+			if (mask(i, j) == 2 || mask(i, j) == 3)
 				fgPixels.emplace_back(fgColor, gaussianFalloff * curAlpha * curAlpha);
 
-			if (bgColor.sum() > 0.f && curAlpha < 1.f)
+			if (mask(i, j) == 1 || mask(i, j) == 3)
 				bgPixels.emplace_back(bgColor, gaussianFalloff * (1 - curAlpha) * (1 - curAlpha));
 		}
 
 	if (count)
 		alphaMean /= count;
-	assert(alphaMean >= 0 && alphaMean <= 1);
 }
