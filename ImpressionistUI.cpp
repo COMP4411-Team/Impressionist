@@ -11,6 +11,7 @@
 
 #include "impressionistUI.h"
 #include "impressionistDoc.h"
+#include "BayesianMatting.h"
 
 using Preset = Painterly::Preset;
 
@@ -608,7 +609,8 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{"&New Mural Image", FL_ALT+'n', (Fl_Callback *)ImpressionistUI::cb_newMural},
 		{"Load Alpha Map", 0, (Fl_Callback *)ImpressionistUI::cb_loadAlphaMap, nullptr, FL_MENU_DIVIDER},
 
-		{"&Painterly", FL_ALT+'p', (Fl_Callback *)ImpressionistUI::cb_painterly, nullptr, FL_MENU_DIVIDER},
+		{"&Painterly", FL_ALT+'p', (Fl_Callback *)ImpressionistUI::cb_painterly},
+		{"Bayesian Matting", 0, (Fl_Callback *)ImpressionistUI::cb_showMattingDialog, nullptr, FL_MENU_DIVIDER},
 	
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
@@ -897,6 +899,23 @@ ImpressionistUI::ImpressionistUI() {
 	p_jitterVSlider = makeSlider(330, 190, 200, 20, "Jitter V", 0, 1, 0.01);
 	p_jitterVSlider->value(pJitterV);
 	p_jitterVSlider->callback(cb_pJitterV);
+
+
+	// Bayesian matting
+	mattingDialog = new Fl_Window(500, 300, "Bayesian Matting");
+	mattingDialog->user_data(this);
+
+	fgBrush = new Fl_Button(30, 100, 150, 25, "Annotate Foreground");
+	fgBrush->user_data(this);
+	fgBrush->callback(cb_fgBrush);
+
+	bgBrush = new Fl_Button(200, 100, 150, 25, "Annotate Background");
+	bgBrush->user_data(this);
+	bgBrush->callback(cb_bgBrush);
+
+	runMatting = new Fl_Button(30, 190, 150, 25, "Run Bayesian Matting");
+	runMatting->user_data(this);
+	runMatting->callback(cb_runMatting);
 }
 
 void ImpressionistUI::cb_pThreshold(Fl_Widget* o, void* v)
@@ -973,3 +992,44 @@ void ImpressionistUI::cb_pJitterV(Fl_Widget* o, void* v)
 {
 	whoami(o)->pJitterV = double( ((Fl_Slider *)o)->value() );
 }
+
+void ImpressionistUI::cb_showMattingDialog(Fl_Menu_* o, void* v)
+{
+	whoami(o)->mattingDialog->show();
+}
+
+void ImpressionistUI::cb_fgBrush(Fl_Widget* o, void* v)
+{
+	auto* doc = whoami(o)->m_pDoc;
+	doc->setBrushType(BRUSH_POINTS);
+	doc->m_nSize = 10;
+	doc->m_pCurrentBrush->useOverrideColor = true;
+	
+	auto* color = doc->m_pCurrentBrush->overrideColor;
+	color[0] = color[1] = color[2] = 255;
+}
+
+void ImpressionistUI::cb_bgBrush(Fl_Widget* o, void* v)
+{
+	auto* doc = whoami(o)->m_pDoc;
+	doc->setBrushType(BRUSH_POINTS);
+	doc->m_nSize = 10;
+	doc->m_pCurrentBrush->useOverrideColor = true;
+	
+	auto* color = doc->m_pCurrentBrush->overrideColor;
+	color[0] = color[1] = color[2] = 0;
+}
+
+void ImpressionistUI::cb_runMatting(Fl_Widget* o, void* v)
+{
+	BayesianMatting predictor(whoami(o)->getDocument());
+	predictor.predict();
+}
+
+void ImpressionistUI::cb_exitMatting(Fl_Window* o, void* v)
+{
+	auto* ui = (ImpressionistUI*)(o->user_data());
+	ui->m_pDoc->m_pCurrentBrush->useOverrideColor = false;
+	Fl_Window::default_callback(o, v);
+}
+

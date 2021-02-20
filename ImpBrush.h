@@ -59,6 +59,9 @@ public:
 	static int			c_nBrushCount;	// How many brushes we have,
 	static ImpBrush**	c_pBrushes;		// and what they are.
 
+	bool useOverrideColor{false};	// if true, ignore color from origView and use the overrideColor
+	unsigned char overrideColor[3];
+
 private:
 	ImpressionistDoc*	m_pDoc;
 

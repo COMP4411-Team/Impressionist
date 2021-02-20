@@ -1,6 +1,6 @@
 /*
  * BayesianMatting.h
- * Implements Bayesian matting from
+ * Implements Bayesian matting proposed by
  *
 	@inproceedings{chuang2001bayesian,
 	  title={A bayesian approach to digital matting},
@@ -11,7 +11,11 @@
 	  year={2001},
 	  organization={IEEE}
 	}
- * 
+ *
+ *
+ * References
+ * https://github.com/praveenVnktsh/Bayesian-Matting
+ * https://www.ctolib.com/topics-118580.html
  */
 
 #pragma once
@@ -40,15 +44,16 @@ public:
 
 	void predict();
 
-	int size;				// size of grid inspected
+	int size{19};			// size of grid inspected
 	float sigma{8.0f};		// sigma for gaussian kernel
-	int minN{};				// if knowns pixels in the grid is smaller than minN, continue
+	int minN{10};			// if knowns pixels in the grid is smaller than minN, continue
 	int nClusters{5};		// num of clusters in k means
 	float kmeansThreshold{1e-3f};
 	int kmeansMaxIter{20};
 	int optimizerMaxIter{10};
 	float optimizerThreshold{1e-3f};
 	float sigmaC{3.f};
+	int passThreshold{5};	// if more passes than passThreshold are needed, increase the sliding window size
 
 private:
 	Eigen::MatrixXf getGaussianFilter();

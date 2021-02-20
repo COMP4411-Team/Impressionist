@@ -83,6 +83,13 @@ public:
 	Fl_Choice* m_pBrushChoice;
 	Fl_Button* runPainterly;
 
+	// Bayesian matting
+	Fl_Window* mattingDialog;
+	Fl_Button* clearCanvas;
+	Fl_Button* fgBrush;
+	Fl_Button* bgBrush;
+	Fl_Button* runMatting;
+
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
 	ImpressionistDoc*	getDocument();
@@ -200,6 +207,13 @@ private:
 	static void cb_pJitterH(Fl_Widget* o, void* v);
 	static void cb_pJitterS(Fl_Widget* o, void* v);
 	static void cb_pJitterV(Fl_Widget* o, void* v);
+
+	// Bayesian matting
+	static void cb_showMattingDialog(Fl_Menu_* o, void* v);
+	static void cb_fgBrush(Fl_Widget* o, void* v);
+	static void cb_bgBrush(Fl_Widget* o, void* v);
+	static void cb_runMatting(Fl_Widget* o, void* v);
+	static void cb_exitMatting(Fl_Window* o, void* v);
 };
 
 #endif

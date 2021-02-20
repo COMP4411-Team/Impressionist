@@ -1,6 +1,6 @@
 /*
  * BayesianMatting.cpp
- * Implement Bayesian matting from
+ * Implement Bayesian matting proposed by
  *
 	@inproceedings{chuang2001bayesian,
 	  title={A bayesian approach to digital matting},
@@ -11,7 +11,11 @@
 	  year={2001},
 	  organization={IEEE}
 	}
- * 
+ *
+ *
+ * References
+ * https://github.com/praveenVnktsh/Bayesian-Matting
+ * https://www.ctolib.com/topics-118580.html
  */
 
 #include "BayesianMatting.h"
@@ -27,7 +31,7 @@ BayesianMatting::BayesianMatting(ImpressionistDoc* doc): doc(doc), height(doc->m
 	foreground(std::vector<std::vector<Vector3f>>(height, std::vector<Vector3f>(width, {0.f, 0.f, 0.f}))),
 	background(std::vector<std::vector<Vector3f>>(height, std::vector<Vector3f>(width, {0.f, 0.f, 0.f}))),
 	alpha(std::vector<std::vector<float>>(height, std::vector<float>(width, 0.f))),
-	mask(MatrixXf::Zero(height, width))
+	mask(MatrixXi::Zero(height, width))
 {
 	preprocessTrimap();
 }
@@ -60,7 +64,7 @@ void BayesianMatting::optimize(Vector3f color, Vector3f fgMean, Vector3f bgMean,
 		b.segment(0, 3) = fgCovInv * fgMean + color * curAlpha / sigmaC2;
 		b.segment(3, 3) = bgCovInv * bgMean + color * (1 - curAlpha) / sigmaC2;
 
-		MatrixXf x = A.colPivHouseholderQr().solve(b);
+		VectorXf x = A.colPivHouseholderQr().solve(b);
 
 		Vector3f F = x.segment(0, 3), B = x.segment(3, 3);
 
@@ -91,7 +95,7 @@ void BayesianMatting::optimize(Vector3f color, Vector3f fgMean, Vector3f bgMean,
 void BayesianMatting::predict()
 {
 	getUnknowns();
-	int nUnknowns = unknowns.size(), count = 0;
+	int nUnknowns = unknowns.size(), count = 0, pass = 0;
 	
 	while(count < nUnknowns)
 	{
@@ -130,7 +134,11 @@ void BayesianMatting::predict()
 			++count;
 		}
 
+		++pass;
 		getUnknowns();
+
+		if (pass > passThreshold)
+			size += 4;
 	}
 
 	display();
@@ -143,7 +151,7 @@ void BayesianMatting::kmeans(std::vector<Pixel>& input)
 	std::vector<Vector3f> clusters;
 	for (int i = 0; i < nClusters; ++i)
 	{
-		clusters.push_back(input[frand() * input.size()].color);
+		clusters.push_back(input[frand() * (input.size() - 1)].color);
 	}
 
 	while(count++ < kmeansMaxIter)
@@ -151,7 +159,7 @@ void BayesianMatting::kmeans(std::vector<Pixel>& input)
 		bool flag = false;
 		std::vector<Vector3f> means;
 		for (int i = 0; i < nClusters; ++i)
-			means.emplace_back(0, 0, 0);
+			means.emplace_back(0.f, 0.f, 0.f);
 		
 		for (auto& pixel : input)
 		{
@@ -195,13 +203,13 @@ void BayesianMatting::preprocessTrimap()
 			{
 				mask(i, j) = 1;
 				unsigned char* color = doc->GetOriginalPixel(j, i);
-				background[i][j] = {color[0], color[1], color[2]};
+				background[i][j] = {(float)color[0], (float)color[1], (float)color[2]};
 			}
 			else if (sum == 255 * 3)
 			{
 				mask(i, j) = 1;
 				unsigned char* color = doc->GetOriginalPixel(j, i);
-				foreground[i][j] = {color[0], color[1], color[2]};
+				foreground[i][j] = {(float)color[0], (float)color[1], (float)color[2]};
 				alpha[i][j] = 1.f;
 			}
 		}
@@ -289,7 +297,7 @@ void BayesianMatting::getNeighbour(Point& coords)
 			alphaMean += curAlpha;
 			Vector3f fgColor = foreground[i][j], bgColor = background[i][j];
 
-			float gaussianFalloff = kernel(i - coords.y + size, j - coords.x + size);
+			float gaussianFalloff = kernel(i - coords.y + size/2, j - coords.x + size/2);
 
 			if (fgColor.sum() > 0)
 				fgPixels.emplace_back(fgColor, gaussianFalloff * curAlpha * curAlpha);

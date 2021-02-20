@@ -44,6 +44,11 @@ void ImpBrush::SetColor (const Point source)
 {
 	ImpressionistDoc* pDoc = GetDocument();
 
+	if (useOverrideColor)
+	{
+		glColor3ubv(overrideColor);
+		return;
+	}
 
 	GLubyte color[4];
 	const double* rgbScale = pDoc->m_pUI->getRgbScale();
