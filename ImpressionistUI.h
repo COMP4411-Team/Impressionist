@@ -16,6 +16,7 @@
 #include <FL/Fl_Button.H>
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Color_Chooser.H>
+#include <FL/Fl_Progress.H>
 
 #include "Impressionist.h"
 #include "OriginalView.h"
@@ -89,6 +90,7 @@ public:
 	Fl_Button* fgBrush;
 	Fl_Button* bgBrush;
 	Fl_Button* runMatting;
+	Fl_Progress* mattingProgress;
 
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);

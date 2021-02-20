@@ -51,7 +51,7 @@
     <OutDir>.\Release\</OutDir>
     <IntDir>C:\temp\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <IncludePath>fltk-1.3.3;fltk-1.3.3\jpeg;fltk-1.3.3\png;fltk-1.3.3\zlib;$(IncludePath)</IncludePath>
+    <IncludePath>fltk-1.3.3;fltk-1.3.3\jpeg;fltk-1.3.3\png;fltk-1.3.3\zlib;eigen3;$(IncludePath)</IncludePath>
     <LibraryPath>fltk-1.3.3\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

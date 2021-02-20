@@ -900,6 +900,8 @@ ImpressionistUI::ImpressionistUI() {
 	p_jitterVSlider->value(pJitterV);
 	p_jitterVSlider->callback(cb_pJitterV);
 
+	m_painterly->end();
+
 
 	// Bayesian matting
 	mattingDialog = new Fl_Window(500, 300, "Bayesian Matting");
@@ -916,6 +918,13 @@ ImpressionistUI::ImpressionistUI() {
 	runMatting = new Fl_Button(30, 190, 150, 25, "Run Bayesian Matting");
 	runMatting->user_data(this);
 	runMatting->callback(cb_runMatting);
+
+	mattingProgress = new Fl_Progress(200, 190, 280, 25, "Progress");
+	mattingProgress->maximum(100.f);
+	mattingProgress->minimum(0.f);
+	mattingProgress->value(0.f);
+
+	mattingDialog->end();
 }
 
 void ImpressionistUI::cb_pThreshold(Fl_Widget* o, void* v)
@@ -1001,8 +1010,8 @@ void ImpressionistUI::cb_showMattingDialog(Fl_Menu_* o, void* v)
 void ImpressionistUI::cb_fgBrush(Fl_Widget* o, void* v)
 {
 	auto* doc = whoami(o)->m_pDoc;
-	doc->setBrushType(BRUSH_POINTS);
-	doc->m_nSize = 10;
+	doc->setBrushType(BRUSH_CIRCLES);
+	doc->m_pUI->m_nSize = 25;
 	doc->m_pCurrentBrush->useOverrideColor = true;
 	
 	auto* color = doc->m_pCurrentBrush->overrideColor;
@@ -1012,8 +1021,8 @@ void ImpressionistUI::cb_fgBrush(Fl_Widget* o, void* v)
 void ImpressionistUI::cb_bgBrush(Fl_Widget* o, void* v)
 {
 	auto* doc = whoami(o)->m_pDoc;
-	doc->setBrushType(BRUSH_POINTS);
-	doc->m_nSize = 10;
+	doc->setBrushType(BRUSH_CIRCLES);
+	doc->m_pUI->m_nSize = 25;
 	doc->m_pCurrentBrush->useOverrideColor = true;
 	
 	auto* color = doc->m_pCurrentBrush->overrideColor;

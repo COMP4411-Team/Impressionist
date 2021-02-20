@@ -49,8 +49,8 @@ public:
 	int minN{10};			// if knowns pixels in the grid is smaller than minN, continue
 	int nClusters{5};		// num of clusters in k means
 	float kmeansThreshold{1e-3f};
-	int kmeansMaxIter{20};
-	int optimizerMaxIter{10};
+	int kmeansMaxIter{30};
+	int optimizerMaxIter{100};
 	float optimizerThreshold{1e-3f};
 	float sigmaC{3.f};
 	int passThreshold{5};	// if more passes than passThreshold are needed, increase the sliding window size
@@ -71,6 +71,8 @@ private:
 	std::pair<Eigen::Vector3f, Eigen::Matrix3f> getMeanAndCov(std::vector<Pixel>& cluster);
 
 	void display();
+
+	void setPaintColor(int row, int col, Eigen::Vector3f& color);
 	
 	ImpressionistDoc* doc;
 
