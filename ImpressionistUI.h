@@ -17,6 +17,9 @@
 #include <FL/Fl_Light_Button.H>
 #include <FL/Fl_Color_Chooser.H>
 #include <FL/Fl_Progress.H>
+#include <FL/Fl_Multiline_Input.H>
+#include <Fl/Fl_Multiline_Output.H>
+#include <Fl/Fl_Value_Input.H>;
 
 #include "Impressionist.h"
 #include "OriginalView.h"
@@ -24,6 +27,7 @@
 
 #include "ImpBrush.h"
 #include "Painterly.h"
+#include "CustomFilter.h"
 
 class ImpressionistUI {
 public:
@@ -92,6 +96,15 @@ public:
 	Fl_Button* runMatting;
 	Fl_Progress* mattingProgress;
 
+	// Custom filter
+	Fl_Window* filterDialog;
+	Fl_Multiline_Input* filterInput;
+	Fl_Multiline_Output* filterView;
+	Fl_Button* filterNormalize;
+	Fl_Button* applyFilter;
+	Fl_Button* setFilter;
+	Fl_Value_Input* filterSizeInput;
+
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
 	ImpressionistDoc*	getDocument();
@@ -131,6 +144,8 @@ public:
 	double pJitterH{0.0}, pJitterS{0.0}, pJitterV{0.0};
 
 	Painterly* painterly{nullptr};
+
+	CustomFilter* customFilter{nullptr};
 
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
@@ -216,6 +231,12 @@ private:
 	static void cb_bgBrush(Fl_Widget* o, void* v);
 	static void cb_runMatting(Fl_Widget* o, void* v);
 	static void cb_exitMatting(Fl_Window* o, void* v);
+
+	// Custom filter
+	static void cb_showCustomFilter(Fl_Menu_* o, void* v);
+	static void cb_filterNormalize(Fl_Widget* o, void* v);
+	static void cb_applyFilter(Fl_Widget* o, void* v);
+	static void cb_setFilter(Fl_Widget* o, void* v);
 };
 
 #endif

@@ -607,6 +607,7 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{"&Colors", FL_ALT+'c', (Fl_Callback *)ImpressionistUI::cb_colors, nullptr, FL_MENU_DIVIDER},
 		{"&Dissolve", FL_ALT+'d', (Fl_Callback *)ImpressionistUI::cb_dissolve},
 		{"&New Mural Image", FL_ALT+'n', (Fl_Callback *)ImpressionistUI::cb_newMural},
+		{"Custom Filter", 0, (Fl_Callback *)ImpressionistUI::cb_showCustomFilter},
 		{"Load Alpha Map", 0, (Fl_Callback *)ImpressionistUI::cb_loadAlphaMap, nullptr, FL_MENU_DIVIDER},
 
 		{"&Painterly", FL_ALT+'p', (Fl_Callback *)ImpressionistUI::cb_painterly},
@@ -925,6 +926,33 @@ ImpressionistUI::ImpressionistUI() {
 	mattingProgress->value(0.f);
 
 	mattingDialog->end();
+
+	// Custom filter
+	filterDialog = new Fl_Window(600, 400, "Custom Filter");
+
+	filterInput = new Fl_Multiline_Input(20, 70, 270, 250, "Filter Weights");
+	filterInput->value("1\t2\t1\n0\t0\t0\n-1\t-2\t-1");
+	filterInput->align(FL_ALIGN_TOP);
+
+	filterView = new Fl_Multiline_Output(310, 70, 270, 250, "Weights Preview");
+	filterView->align(FL_ALIGN_TOP);
+	
+	filterNormalize = new Fl_Button(140, 340, 100, 25, "Normalize");
+	filterNormalize->user_data(this);
+	filterNormalize->callback(cb_filterNormalize);
+	
+	applyFilter = new Fl_Button(260, 340, 100, 25, "Apply");
+	applyFilter->user_data(this);
+	applyFilter->callback(cb_applyFilter);
+
+	setFilter = new Fl_Button(20, 340, 100, 25, "Set Weights");
+	setFilter->user_data(this);
+	setFilter->callback(cb_setFilter);
+	
+	filterSizeInput = new Fl_Value_Input(100, 15, 100, 25, "Filter Size");
+	filterSizeInput->value(3);
+	filterSizeInput->minimum(1);
+	filterSizeInput->step(1);
 }
 
 void ImpressionistUI::cb_pThreshold(Fl_Widget* o, void* v)
@@ -1040,5 +1068,42 @@ void ImpressionistUI::cb_exitMatting(Fl_Window* o, void* v)
 	auto* ui = (ImpressionistUI*)(o->user_data());
 	ui->m_pDoc->m_pCurrentBrush->useOverrideColor = false;
 	Fl_Window::default_callback(o, v);
+}
+
+void ImpressionistUI::cb_showCustomFilter(Fl_Menu_* o, void* v)
+{
+	whoami(o)->filterDialog->show();
+}
+
+void ImpressionistUI::cb_filterNormalize(Fl_Widget* o, void* v)
+{
+	auto* ui = whoami(o);
+	if (ui->customFilter == nullptr)
+		return;
+	ui->customFilter->normalize();
+	ui->filterView->value(ui->customFilter->getParsedWeights().c_str());
+}
+
+void ImpressionistUI::cb_applyFilter(Fl_Widget* o, void* v)
+{
+	auto* ui = whoami(o);
+	if (ui->customFilter == nullptr)
+		return;
+	ui->customFilter->applyFilter();
+	ui->m_paintView->refresh();
+}
+
+void ImpressionistUI::cb_setFilter(Fl_Widget* o, void* v)
+{
+	auto* ui = whoami(o);
+	delete ui->customFilter;
+	ui->customFilter = new CustomFilter(ui->getDocument(), int(ui->filterSizeInput->value()));
+	bool success = ui->customFilter->parseWeights(ui->filterInput->value());
+	if (!success)
+	{
+		ui->filterView->value("Invalid input.");
+		return;
+	}
+	ui->filterView->value(ui->customFilter->getParsedWeights().c_str());
 }
 
