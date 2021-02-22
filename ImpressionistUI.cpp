@@ -374,6 +374,10 @@ void ImpressionistUI::cb_autoPaint(Fl_Widget* o, void* v)
 	pDoc->autoPaint();
 }
 
+//void ImpressionistUI::cb_anotherGradient(Fl_Widget* o, void* v) {
+
+//}
+
 void ImpressionistUI::cb_colors(Fl_Menu_* o, void* v)
 {
 	whoami(o)->m_colorDialog->show();
@@ -786,7 +790,12 @@ ImpressionistUI::ImpressionistUI() {
 		m_undo->user_data((void*)this);
 		m_undo->callback(cb_undo);
 
-		m_spacingSlider = new Fl_Value_Slider(10, 320, 150, 20, "Spacing");
+		//m_anotherGradient = new Fl_Light_Button(200, 320, 170, 20, "Another Gradient");
+		//m_anotherGradient->user_data((void*)(this));   // record self to be used by static callback functions
+		//m_anotherGradient->callback(cb_sizeRand);
+		//m_anotherGradient->deactivate;
+
+		m_spacingSlider = new Fl_Value_Slider(10, 360, 150, 20, "Spacing");
 		m_spacingSlider->user_data((void*)(this));	// record self to be used by static callback functions
 		m_spacingSlider->type(FL_HOR_NICE_SLIDER);
 		m_spacingSlider->labelfont(FL_COURIER);
@@ -798,11 +807,11 @@ ImpressionistUI::ImpressionistUI() {
 		m_spacingSlider->align(FL_ALIGN_RIGHT);
 		m_spacingSlider->callback(cb_space);
 
-		m_sizeRand = new Fl_Light_Button(220, 320, 90, 20, "Size Rand");
+		m_sizeRand = new Fl_Light_Button(220, 360, 90, 20, "Size Rand");
 		m_sizeRand->user_data((void*)(this));   // record self to be used by static callback functions
 		m_sizeRand->callback(cb_sizeRand);
 
-		m_autoPaint = new Fl_Button(330, 320, 50, 20, "Paint");
+		m_autoPaint = new Fl_Button(330, 360, 50, 20, "Paint");
 		m_autoPaint->user_data((void*)this);
 		m_autoPaint->callback(cb_autoPaint);
 

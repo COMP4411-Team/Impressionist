@@ -29,7 +29,7 @@ public:
 	int		loadImage(char *iname);			// called by the UI to load image
 	int		saveImage(char *iname);			// called by the UI to save image
 
-	int dissolveImage(char* name);
+	int dissolveImage(char* name); 
 	int loadMuralImage(char* name);
 	int loadAlphaMap(char* name);
 

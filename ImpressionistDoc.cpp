@@ -35,6 +35,10 @@ ImpressionistDoc::ImpressionistDoc()
 	m_ucBitmap		= NULL;
 	m_ucPainting	= NULL;
 
+	//initialize the size of paint;
+	m_nPaintWidth	= 0;
+	m_nPaintHeight	= 0;
+
 
 	// create one instance of each brush
 	ImpBrush::c_nBrushCount	= NUM_BRUSH_TYPE;

@@ -191,6 +191,7 @@ void BayesianMatting::predict()
 // Use k means instead of Orchard-Bouman clustering mentioned in the paper
 void BayesianMatting::kmeans(std::vector<Pixel>& input)
 {
+	int numPoints[5];
 	int count = 0;
 	std::vector<Vector3d> clusters;
 	for (int i = 0; i < nClusters; ++i)
@@ -200,10 +201,13 @@ void BayesianMatting::kmeans(std::vector<Pixel>& input)
 
 	while(count++ < kmeansMaxIter)
 	{
+
 		bool flag = false;
 		std::vector<Vector3d> means;
-		for (int i = 0; i < nClusters; ++i)
+		for (int i = 0; i < nClusters; ++i) {
 			means.emplace_back(0.f, 0.f, 0.f);
+			numPoints[i] = 0;
+		}
 		
 		for (auto& pixel : input)
 		{
@@ -217,6 +221,12 @@ void BayesianMatting::kmeans(std::vector<Pixel>& input)
 				}
 			}
 			means[pixel.cluster] += pixel.color;
+		}
+
+		for (int i = 0; i < nClusters; ++i) {
+			for (int j = 0; j < 3; j++) {
+				means[i][j] /= numPoints[i];
+			}
 		}
 
 		for (int i = 0; i < nClusters; ++i)

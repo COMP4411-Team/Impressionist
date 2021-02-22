@@ -56,6 +56,9 @@ public:
 	Fl_Light_Button*	m_sizeRand;
 	Fl_Button*			m_autoPaint;
 
+	//Another gradient
+	//Fl_Light_Button*	m_anotherGradient;
+
 	// Painterly sliders
 	Fl_Slider* p_thresholdSlider;
 	Fl_Slider* p_layerSlider;
@@ -193,9 +196,12 @@ private:
 	static void cb_transSlides(Fl_Widget* o, void* v);
 	static void cb_swapCanvasAndOrigin(Fl_Widget* o, void* v);
 	static void cb_undo(Fl_Widget* o, void* v);
+
 	static void cb_space(Fl_Widget* o, void* v);
 	static void cb_sizeRand(Fl_Widget* o, void* v);
 	static void cb_autoPaint(Fl_Widget* o, void* v);
+
+	//static void cb_anotherGradient(Fl_Widget* o, void* v);
 	
 	static void cb_colors(Fl_Menu_* o, void* v);
 	static void cb_colorChooser(Fl_Widget* o, void* v);

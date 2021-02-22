@@ -42,6 +42,7 @@ PaintView::PaintView(int			x,
 {
 	m_nWindowWidth	= w;
 	m_nWindowHeight	= h;
+	
 }
 
 PaintView::~PaintView()
@@ -168,7 +169,11 @@ void PaintView::draw()
 
 	if (enableAutoPaint)
 	{
+		backupCanvas();
 		autoPaint();
+		SaveCurrentContent();
+		RestoreContent();
+		refresh();
 		enableAutoPaint = false;
 	}
 
@@ -249,7 +254,11 @@ void PaintView::SaveCurrentContent()
 {
 	// Tell openGL to read from the front buffer when capturing
 	// out paint strokes
-	glReadBuffer(GL_FRONT);
+	if (enableAutoPaint = TRUE) {
+		glReadBuffer(GL_BACK);
+		enableAutoPaint = false;
+	}
+	else { glReadBuffer(GL_FRONT); }
 
 	glPixelStorei( GL_PACK_ALIGNMENT, 1 );
 	glPixelStorei( GL_PACK_ROW_LENGTH, m_pDoc->m_nPaintWidth );
@@ -342,9 +351,9 @@ void PaintView::setAngleFromBrushDir(Point prev, Point cur)
 
 void PaintView::backupCanvas()
 {
-	delete [] (GLubyte*)m_pPrevBitstart;
-	m_pPrevBitstart = new GLubyte[m_nDrawHeight * m_nDrawWidth * 3];
-	memcpy((GLubyte*)m_pPrevBitstart, (GLubyte*)m_pPaintBitstart, m_nDrawHeight * m_nDrawWidth * 3);
+	if (m_pPrevBitstart) { delete[](GLubyte*)m_pPrevBitstart; }
+	m_pPrevBitstart = new GLubyte[m_nDrawHeight * m_nDrawWidth * 4];
+	memcpy((GLubyte*)m_pPrevBitstart, (GLubyte*)m_pPaintBitstart, m_nDrawHeight * m_nDrawWidth * 4);
 }
 
 bool PaintView::pixelEqual(GLubyte* a, GLubyte* b)
@@ -364,10 +373,9 @@ void PaintView::autoPaint()
 			}
 			m_pDoc->m_pCurrentBrush->BrushBegin(Point(i, j), Point(i, j));
 		}
+		
 	}
 	m_pDoc->m_pUI->setSize(Osize);
-
-	refresh();
 }
 
 bool PaintView::isInCanvas(const Point& target)
