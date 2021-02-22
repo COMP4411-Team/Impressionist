@@ -191,9 +191,9 @@ void BayesianMatting::predict()
 // Use k means instead of Orchard-Bouman clustering mentioned in the paper
 void BayesianMatting::kmeans(std::vector<Pixel>& input)
 {
-	int numPoints[5];
 	int count = 0;
 	std::vector<Vector3d> clusters;
+	std::vector<int> numPoints(nClusters, 0);
 	for (int i = 0; i < nClusters; ++i)
 	{
 		clusters.push_back(input[frand() * (input.size() - 1)].color);
@@ -206,7 +206,6 @@ void BayesianMatting::kmeans(std::vector<Pixel>& input)
 		std::vector<Vector3d> means;
 		for (int i = 0; i < nClusters; ++i) {
 			means.emplace_back(0.f, 0.f, 0.f);
-			numPoints[i] = 0;
 		}
 		
 		for (auto& pixel : input)
@@ -221,13 +220,11 @@ void BayesianMatting::kmeans(std::vector<Pixel>& input)
 				}
 			}
 			means[pixel.cluster] += pixel.color;
+			++numPoints[pixel.cluster];
 		}
 
-		for (int i = 0; i < nClusters; ++i) {
-			for (int j = 0; j < 3; j++) {
-				means[i][j] /= numPoints[i];
-			}
-		}
+		for (int i = 0; i < nClusters; ++i)
+				means[i] /= numPoints[i];
 
 		for (int i = 0; i < nClusters; ++i)
 		{
@@ -318,11 +315,11 @@ void BayesianMatting::display()
 			paint[index + 1] = color(1);
 			paint[index + 2] = color(2);*/
 			
-			setPaintColor(i, j, foreground[i][j]);
+			// setPaintColor(i, j, foreground[i][j]);
 			
-			/*double curAlpha = alpha[i][j] * 255;
+			double curAlpha = alpha[i][j] * 255;
 			Vector3d greyScale(curAlpha, curAlpha, curAlpha);
-			setPaintColor(i, j, greyScale);*/
+			setPaintColor(i, j, greyScale);
 		}
 
 	doc->m_pUI->m_paintView->refresh();
