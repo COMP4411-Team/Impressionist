@@ -282,12 +282,14 @@ void ImpressionistUI::cb_brushChoice(Fl_Widget* o, void* v)
 		pUI->m_BrushWidthSlider->deactivate();
 		pUI->m_BrushAngleSlider->deactivate();
 		pUI->m_StrokeDirectionChoice->deactivate();
+		pUI->m_anotherGradient->deactivate();
 	}
 	else
 	{
 		pUI->m_BrushWidthSlider->activate();
 		pUI->m_BrushAngleSlider->activate();
 		pUI->m_StrokeDirectionChoice->activate();
+		pUI->m_anotherGradient->activate();
 	}
 
 	pDoc->setBrushType(type);
@@ -374,9 +376,21 @@ void ImpressionistUI::cb_autoPaint(Fl_Widget* o, void* v)
 	pDoc->autoPaint();
 }
 
-//void ImpressionistUI::cb_anotherGradient(Fl_Widget* o, void* v) {
+void ImpressionistUI::cb_anotherGradient(Fl_Widget* o, void* v) {
+	ImpressionistUI* pUI = ((ImpressionistUI*)(o->user_data()));
+	ImpressionistDoc* pDoc = pUI->getDocument();
 
-//}
+	if (pDoc->ableAnotherGradient == TRUE) pDoc->ableAnotherGradient = FALSE;
+	else pDoc->ableAnotherGradient = TRUE;
+
+	if (pDoc->ableAnotherGradient) {
+		char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
+		if (newfile != NULL) {
+			pDoc->loadGradientImage(newfile);
+		}
+	}
+	
+}
 
 void ImpressionistUI::cb_colors(Fl_Menu_* o, void* v)
 {
@@ -790,10 +804,10 @@ ImpressionistUI::ImpressionistUI() {
 		m_undo->user_data((void*)this);
 		m_undo->callback(cb_undo);
 
-		//m_anotherGradient = new Fl_Light_Button(200, 320, 170, 20, "Another Gradient");
-		//m_anotherGradient->user_data((void*)(this));   // record self to be used by static callback functions
-		//m_anotherGradient->callback(cb_sizeRand);
-		//m_anotherGradient->deactivate;
+		m_anotherGradient = new Fl_Light_Button(200, 320, 170, 20, "Another Gradient");
+		m_anotherGradient->user_data((void*)(this));   // record self to be used by static callback functions
+		m_anotherGradient->callback(cb_anotherGradient);
+		m_anotherGradient->deactivate();
 
 		m_spacingSlider = new Fl_Value_Slider(10, 360, 150, 20, "Spacing");
 		m_spacingSlider->user_data((void*)(this));	// record self to be used by static callback functions
@@ -837,13 +851,13 @@ ImpressionistUI::ImpressionistUI() {
 	m_pPresetChoice->menu(painterlyPresets);
 	m_pPresetChoice->callback(cb_painterlyPresets);
 
-	/*
+	
 	m_pBrushChoice = new Fl_Choice(113, 45, 150, 25, "Stroke");
 	m_pBrushChoice->user_data((void*)(this));
 	m_pBrushChoice->menu(strokeDirectionMenu);
 	m_pBrushChoice->callback(cb_strokeChoice);
 	m_pBrushChoice->deactivate();
-	*/
+	
 
 	runPainterly = new Fl_Button(300,10,50,25,"Run");
 	runPainterly->user_data((void*)(this));

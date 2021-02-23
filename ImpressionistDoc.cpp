@@ -144,6 +144,7 @@ int ImpressionistDoc::loadImage(char *iname)
 	m_nHeight		= height;
 	m_nPaintHeight	= height;
 
+
 	// release old storage
 	if ( m_ucBitmap ) delete [] m_ucBitmap;
 	if ( m_ucPainting ) delete [] m_ucPainting;
@@ -265,6 +266,35 @@ m_pUI->m_paintView->refresh();
 return 1;
 }
 
+int ImpressionistDoc::loadGradientImage(char* iname) {
+	unsigned char*	data;
+	int				width,
+					height;
+
+	if ((data = readBMP(iname, width, height)) == NULL)
+	{
+		fl_alert("Can't load bitmap file");
+		return 0;
+	}
+
+	if ((m_nPaintHeight > height || m_nPaintWidth > width)) {
+		fl_alert("The painting map is larger than the map of another Gradient");
+		return 0;
+	}
+
+	// reflect the fact of loading the new image
+	m_GPaintWidth = width;
+	m_GPaintHeight = height;
+
+
+	// release old storage
+	if (m_GPainting!= nullptr) delete[] m_GPainting;
+
+	m_GPainting = data;
+
+	return 1;
+}
+
 
 //----------------------------------------------------------------
 // Save the specified image
@@ -310,6 +340,7 @@ int ImpressionistDoc::clearCanvas()
 //------------------------------------------------------------------
 GLubyte* ImpressionistDoc::GetOriginalPixel(int x, int y)
 {
+
 	if (x < 0)
 		x = 0;
 	else if (x >= m_nWidth)
@@ -321,6 +352,7 @@ GLubyte* ImpressionistDoc::GetOriginalPixel(int x, int y)
 		y = m_nHeight - 1;
 
 	return (GLubyte*)(m_ucBitmap + 3 * (y * m_nWidth + x));
+
 }
 
 //----------------------------------------------------------------
@@ -329,6 +361,30 @@ GLubyte* ImpressionistDoc::GetOriginalPixel(int x, int y)
 GLubyte* ImpressionistDoc::GetOriginalPixel(const Point p)
 {
 	return GetOriginalPixel(p.x, p.y);
+}
+
+//------------------------------------------------------------------
+// Get the color of the pixel in the gradient image at coord x and y
+//------------------------------------------------------------------
+GLubyte* ImpressionistDoc::GetGradientPixel(int x, int y) {
+	if (x < 0)
+		x = 0;
+	else if (x >= m_GPaintWidth)
+		x = m_GPaintWidth - 1;
+
+	if (y < 0)
+		y = 0;
+	else if (y >= m_GPaintHeight)
+		y = m_GPaintHeight - 1;
+
+	return (GLubyte*)(m_GPainting + 3 * (y * m_GPaintWidth + x));
+}
+//----------------------------------------------------------------
+// Get the color of the pixel in the gradient image at point p
+//----------------------------------------------------------------
+GLubyte* ImpressionistDoc::GetGradientPixel(const Point p)
+{
+	return GetGradientPixel(p.x, p.y);
 }
 
 void ImpressionistDoc::writePixel(int x, int y, GLubyte* pixel)
@@ -345,6 +401,8 @@ void ImpressionistDoc::swapCanvasAndOrigin()
 	m_pUI->m_origView->refresh();
 	m_pUI->m_paintView->refresh();
 }
+
+
 
 void ImpressionistDoc::initBackground()
 {

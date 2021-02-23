@@ -54,7 +54,10 @@ void BayesianMatting::getUnknowns()
 
 void BayesianMatting::optimize(Vector3d color, Vector3d fgMean, Vector3d bgMean, Matrix3d fgCov, Matrix3d bgCov)
 {
-	double curAlpha = alphaMean, prevLikelihood = std::numeric_limits<double>::lowest(), sigmaC2 = sigmaC * sigmaC;
+	double prevAlpha = alphaMean;
+	double curAlpha = alphaMean, sigmaC2 = sigmaC * sigmaC;
+	double	prevLikelihood = std::numeric_limits<double>::lowest();
+
 	Matrix3d fgCovInv = fgCov.inverse(), bgCovInv = bgCov.inverse();
 	
 	for (int i = 0; i < optimizerMaxIter; ++i)
@@ -62,6 +65,8 @@ void BayesianMatting::optimize(Vector3d color, Vector3d fgMean, Vector3d bgMean,
 		// Optimize F and B
 		MatrixXd A(6, 6);
 		VectorXd b(6);
+
+		//set prevAlpha
 
 		A.block<3, 3>(0, 0) = fgCovInv + Matrix3d::Identity() * curAlpha * curAlpha / sigmaC2;
 		A.block<3, 3>(0, 3) = Matrix3d::Identity() * curAlpha * (1 - curAlpha) / sigmaC2;
@@ -81,6 +86,7 @@ void BayesianMatting::optimize(Vector3d color, Vector3d fgMean, Vector3d bgMean,
 		curAlpha = max(0.0, curAlpha);
 		curAlpha = min(1.0, curAlpha);
 		
+		
 		// Calculate likelihood
 		double curLikelihood = -(color - curAlpha * F - (1 - curAlpha) * B).squaredNorm() / sigmaC2;
 		curLikelihood -= ((F - fgMean).transpose() * fgCovInv * (F - fgMean) / 2).sum();		// degenerate to 1x1 mat
@@ -88,6 +94,7 @@ void BayesianMatting::optimize(Vector3d color, Vector3d fgMean, Vector3d bgMean,
 
 		if (i && std::abs(curLikelihood - prevLikelihood) < optimizerThreshold)
 			break;
+
 		
 		if (curLikelihood > maxLikelihood)
 		{
@@ -96,8 +103,12 @@ void BayesianMatting::optimize(Vector3d color, Vector3d fgMean, Vector3d bgMean,
 			optimumB = B;
 			optimumF = F;
 		}
+		
+
+
 
 		prevLikelihood = curLikelihood;
+
 	}
 	
 }
@@ -315,7 +326,7 @@ void BayesianMatting::display()
 			paint[index + 1] = color(1);
 			paint[index + 2] = color(2);*/
 			
-			// setPaintColor(i, j, foreground[i][j]);
+			//setPaintColor(i, j, foreground[i][j]);
 			
 			double curAlpha = alpha[i][j] * 255;
 			Vector3d greyScale(curAlpha, curAlpha, curAlpha);

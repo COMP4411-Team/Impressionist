@@ -88,7 +88,9 @@ void LineBrush::drawLine(const Point source, const Point target, const int size,
 
 double LineBrush::rgbToGreyScale(ImpressionistDoc *pDoc, Point source)
 {
-	GLubyte* pixel = pDoc->GetOriginalPixel(source);
+	GLubyte* pixel;
+	if (pDoc->ableAnotherGradient)pixel = pDoc->GetGradientPixel(source);
+	else pixel = pDoc->GetOriginalPixel(source);
 	return 0.3 * pixel[0] * 0.59 * pixel[1] * 0.11 * pixel[2];
 }
 

@@ -52,7 +52,7 @@ public:
 	double kmeansThreshold{1e-3};
 	int kmeansMaxIter{20};
 	int optimizerMaxIter{50};
-	double optimizerThreshold{1e-3};
+	double optimizerThreshold{1e-5};
 	double sigmaC{3.0};
 	int passThreshold{5};	// if more passes than passThreshold are needed, increase the sliding window size
 
