@@ -47,13 +47,36 @@ void LineBrush::drawLine(const Point source, const Point target, const int size,
 {
     ImpressionistDoc* pDoc = GetDocument();
 
-    double deltaX1 = size / 2.0 * cos(angle * PI / 180);
-    double deltaY1 = size / 2.0 * sin(angle * PI / 180);
+	double lsize = -size / 2.0, rsize = size / 2.0;
 
-	Point end1(target.x + deltaX1, target.y + deltaY1);
-	Point end2(target.x - deltaX1, target.y - deltaY1);
+	if (pDoc->enableEdgeClip&&pDoc->m_EPainting!=nullptr) {
+		GLubyte* Esource = pDoc->GetEdgePixel(source);
+		for (int i = 0; i >= -size / 2.0; --i) {
+			GLubyte* Epoint = pDoc->GetEdgePixel(source.x + i * cos(angle * PI / 180), source.y + i * sin(angle * PI / 180));
+			if (Epoint[0] != Esource[0] || Esource[1] != Epoint[1] || Esource[2] != Epoint[2]) {
+				lsize = i;
+				break;
+			}
+		}
+		for (int i = 0; i <= size / 2.0; ++i) {
+			GLubyte* Epoint = pDoc->GetEdgePixel(source.x + i * cos(angle * PI / 180), source.y + i * sin(angle * PI / 180));
+			if (Esource[0] != Epoint[0] || Esource[1] != Epoint[1] || Esource[2] != Epoint[2]) {
+				rsize = i;
+				break;
+			}
+		}
+	}
+
+    double ldeltaX = lsize  * cos(angle * PI / 180);
+    double ldeltaY = lsize  * sin(angle * PI / 180);
+	double rdeltaX = rsize  * cos(angle * PI / 180);
+	double rdeltaY = rsize  * sin(angle * PI / 180);
+
+	Point end1(target.x + rdeltaX, target.y + rdeltaY);
+	Point end2(target.x + ldeltaX, target.y +ldeltaY);
 	clipLine(target, end1);
 	clipLine(target, end2);
+
 
     // double deltaX2 = width / 2.0 * cos((angle + 90) * PI / 180);
     // double deltaY2 = width / 2.0 * sin((angle + 90) * PI / 180);
@@ -89,7 +112,7 @@ void LineBrush::drawLine(const Point source, const Point target, const int size,
 double LineBrush::rgbToGreyScale(ImpressionistDoc *pDoc, Point source)
 {
 	GLubyte* pixel;
-	if (pDoc->ableAnotherGradient)pixel = pDoc->GetGradientPixel(source);
+	if (pDoc->ableAnotherGradient&&pDoc->m_GPainting!=nullptr)pixel = pDoc->GetGradientPixel(source);
 	else pixel = pDoc->GetOriginalPixel(source);
 	return 0.3 * pixel[0] * 0.59 * pixel[1] * 0.11 * pixel[2];
 }
@@ -115,7 +138,7 @@ void LineBrush::clipLine(const Point& start, Point& end)
 {
 	PaintView* view = GetDocument()->m_pUI->m_paintView;
 
-	// Start is guaranteed to be in the canvas
+	//start point is in the canvas
 	if (view->isInCanvas(end)) return;
 
 	double slope = (end.y - start.y) / ((end.x - start.x) + EPSILON), intercept = start.y - slope * start.x;

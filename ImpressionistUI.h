@@ -59,6 +59,9 @@ public:
 	//Another gradient
 	Fl_Light_Button*	m_anotherGradient;
 
+	//Edge clipping
+	Fl_Light_Button*	m_edgeClip;
+
 	// Painterly sliders
 	Fl_Slider* p_thresholdSlider;
 	Fl_Slider* p_layerSlider;
@@ -201,7 +204,11 @@ private:
 	static void cb_sizeRand(Fl_Widget* o, void* v);
 	static void cb_autoPaint(Fl_Widget* o, void* v);
 
+	static void cb_loadGradientMap(Fl_Menu_* o, void* v);
 	static void cb_anotherGradient(Fl_Widget* o, void* v);
+
+	static void cb_loadEdgeMap(Fl_Menu_* o, void* v);
+	static void cb_edgeClip(Fl_Widget* o, void* v);
 	
 	static void cb_colors(Fl_Menu_* o, void* v);
 	static void cb_colorChooser(Fl_Widget* o, void* v);

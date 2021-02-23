@@ -55,11 +55,15 @@ public:
 	//Dimensions of the paint for another Gradient
 	int				m_GPaintWidth,
 		m_GPaintHeight;
+	//Dimensions of the paint for edge painting
+	int				m_EPaintWidth,
+		m_EPaintHeight;
 	// Bitmaps for original image and painting.
 	unsigned char* m_ucBitmap;
 	unsigned char* m_ucPainting;
 	unsigned char* m_background{ nullptr };
 	unsigned char* m_GPainting{ nullptr };// painting of another Gradient;
+	unsigned char* m_EPainting{ nullptr };//edge painting;
 
 	// Stroke direction
 	StrokeDirection m_strokeDirection{ StrokeDirection::SLIDER };
@@ -75,6 +79,8 @@ public:
 	bool sizeRand = FALSE; //whether use random size for autopainting.
 
 	bool ableAnotherGradient = FALSE;//whether use another gradient.
+	
+	bool enableEdgeClip = FALSE;//whether use edge clipping.
 
 // Operations
 public:
@@ -86,6 +92,10 @@ public:
 	GLubyte* GetGradientPixel(int x, int y);
 	// Get the color of the Gradient Picture	
 	GLubyte* GetGradientPixel(const Point p);
+	// Get the color of the Edge Picture
+	GLubyte* GetEdgePixel(int x, int y);
+	// Get the color of the Edge Picture	
+	GLubyte* GetEdgePixel(const Point p);
 
 	// Draw a pixel on the canvas
 	void writePixel(int x, int y, GLubyte* pixel);
@@ -97,6 +107,7 @@ public:
 	void autoPaint();
 
 	int loadGradientImage(char* name);//Load the image for another Gradient
+	int loadEdgeImage(char* name); //Load the image for edge painting.
 
 private:
 	char			m_imageName[256];

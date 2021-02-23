@@ -295,6 +295,35 @@ int ImpressionistDoc::loadGradientImage(char* iname) {
 	return 1;
 }
 
+int ImpressionistDoc::loadEdgeImage(char* iname) {
+	unsigned char* data;
+	int				width,
+		height;
+
+	if ((data = readBMP(iname, width, height)) == NULL)
+	{
+		fl_alert("Can't load bitmap file");
+		return 0;
+	}
+
+	if ((m_nPaintHeight != height || m_nPaintWidth != width)) {
+		fl_alert("The loading map is not the edge map of the mapping");
+		return 0;
+	}
+
+	// reflect the fact of loading the new image
+	m_EPaintWidth = width;
+	m_EPaintHeight = height;
+
+
+	// release old storage
+	if (m_EPainting != nullptr) delete[] m_EPainting;
+
+	m_EPainting = data;
+
+	return 1;
+}
+
 
 //----------------------------------------------------------------
 // Save the specified image
@@ -361,6 +390,30 @@ GLubyte* ImpressionistDoc::GetOriginalPixel(int x, int y)
 GLubyte* ImpressionistDoc::GetOriginalPixel(const Point p)
 {
 	return GetOriginalPixel(p.x, p.y);
+}
+
+//------------------------------------------------------------------
+// Get the color of the pixel in the Edge image at coord x and y
+//------------------------------------------------------------------
+GLubyte* ImpressionistDoc::GetEdgePixel(int x, int y) {
+	if (x < 0)
+		x = 0;
+	else if (x >= m_EPaintWidth)
+		x = m_EPaintWidth - 1;
+
+	if (y < 0)
+		y = 0;
+	else if (y >= m_EPaintHeight)
+		y = m_EPaintHeight - 1;
+
+	return (GLubyte*)(m_EPainting + 3 * (y * m_EPaintWidth + x));
+}
+//----------------------------------------------------------------
+// Get the color of the pixel in the Edge image at point p
+//----------------------------------------------------------------
+GLubyte* ImpressionistDoc::GetEdgePixel(const Point p)
+{
+	return GetEdgePixel(p.x, p.y);
 }
 
 //------------------------------------------------------------------

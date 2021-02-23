@@ -283,6 +283,7 @@ void ImpressionistUI::cb_brushChoice(Fl_Widget* o, void* v)
 		pUI->m_BrushAngleSlider->deactivate();
 		pUI->m_StrokeDirectionChoice->deactivate();
 		pUI->m_anotherGradient->deactivate();
+		pUI->m_edgeClip->deactivate();
 	}
 	else
 	{
@@ -290,6 +291,7 @@ void ImpressionistUI::cb_brushChoice(Fl_Widget* o, void* v)
 		pUI->m_BrushAngleSlider->activate();
 		pUI->m_StrokeDirectionChoice->activate();
 		pUI->m_anotherGradient->activate();
+		pUI->m_edgeClip->activate();
 	}
 
 	pDoc->setBrushType(type);
@@ -383,13 +385,29 @@ void ImpressionistUI::cb_anotherGradient(Fl_Widget* o, void* v) {
 	if (pDoc->ableAnotherGradient == TRUE) pDoc->ableAnotherGradient = FALSE;
 	else pDoc->ableAnotherGradient = TRUE;
 
-	if (pDoc->ableAnotherGradient) {
+	if (pDoc->ableAnotherGradient&&pDoc->m_GPainting==nullptr) {
 		char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
 		if (newfile != NULL) {
 			pDoc->loadGradientImage(newfile);
 		}
 	}
 	
+}
+
+void ImpressionistUI::cb_edgeClip(Fl_Widget* o, void* v) {
+	ImpressionistUI* pUI = ((ImpressionistUI*)(o->user_data()));
+	ImpressionistDoc* pDoc = pUI->getDocument();
+
+	if (pDoc->enableEdgeClip == TRUE) pDoc->enableEdgeClip = FALSE;
+	else pDoc->enableEdgeClip = TRUE;
+
+	if (pDoc->enableEdgeClip&&pDoc->m_EPainting==nullptr) {
+		char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
+		if (newfile != NULL) {
+			pDoc->loadEdgeImage(newfile);
+		}
+	}
+
 }
 
 void ImpressionistUI::cb_colors(Fl_Menu_* o, void* v)
@@ -439,6 +457,26 @@ void ImpressionistUI::cb_loadAlphaMap(Fl_Menu_* o, void* v)
 	char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName() );
 	if (newfile != NULL) {
 		pDoc->loadAlphaMap(newfile);
+	}
+}
+
+void ImpressionistUI::cb_loadGradientMap(Fl_Menu_* o, void* v)
+{
+	ImpressionistDoc* pDoc = whoami(o)->getDocument();
+
+	char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
+	if (newfile != NULL) {
+		pDoc->loadGradientImage(newfile);
+	}
+}
+
+void ImpressionistUI::cb_loadEdgeMap(Fl_Menu_* o, void* v)
+{
+	ImpressionistDoc* pDoc = whoami(o)->getDocument();
+
+	char* newfile = fl_file_chooser("Open File?", "*.bmp", pDoc->getImageName());
+	if (newfile != NULL) {
+		pDoc->loadEdgeImage(newfile);
 	}
 }
 
@@ -628,6 +666,9 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{"Custom Filter", 0, (Fl_Callback *)ImpressionistUI::cb_showCustomFilter},
 		{"Load Alpha Map", 0, (Fl_Callback *)ImpressionistUI::cb_loadAlphaMap, nullptr, FL_MENU_DIVIDER},
 
+		{"Load Gradient Map", 0,(Fl_Callback*)ImpressionistUI::cb_loadGradientMap},
+		{"Load Edge Map", 0,(Fl_Callback*)ImpressionistUI::cb_loadEdgeMap},
+
 		{"&Painterly", FL_ALT+'p', (Fl_Callback *)ImpressionistUI::cb_painterly},
 		{"Bayesian Matting", 0, (Fl_Callback *)ImpressionistUI::cb_showMattingDialog, nullptr, FL_MENU_DIVIDER},
 	
@@ -804,10 +845,15 @@ ImpressionistUI::ImpressionistUI() {
 		m_undo->user_data((void*)this);
 		m_undo->callback(cb_undo);
 
-		m_anotherGradient = new Fl_Light_Button(200, 320, 170, 20, "Another Gradient");
+		m_anotherGradient = new Fl_Light_Button(200, 320, 150, 20, "Another Gradient");
 		m_anotherGradient->user_data((void*)(this));   // record self to be used by static callback functions
 		m_anotherGradient->callback(cb_anotherGradient);
 		m_anotherGradient->deactivate();
+
+		m_edgeClip = new Fl_Light_Button(10, 320, 140, 20, "Edge Clipping");
+		m_edgeClip->user_data((void*)(this));   // record self to be used by static callback functions
+		m_edgeClip->callback(cb_edgeClip);
+		m_edgeClip->deactivate();
 
 		m_spacingSlider = new Fl_Value_Slider(10, 360, 150, 20, "Spacing");
 		m_spacingSlider->user_data((void*)(this));	// record self to be used by static callback functions
