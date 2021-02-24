@@ -411,6 +411,71 @@ void ImpressionistUI::cb_edgeClip(Fl_Widget* o, void* v) {
 
 }
 
+void ImpressionistUI::cb_edgeThreshold(Fl_Widget* o, void* v) {
+	((ImpressionistUI*)(o->user_data()))->edgeThreshold = int(((Fl_Slider*)o)->value());
+}
+
+void ImpressionistUI::cb_findEdge(Fl_Widget* o, void* v) {
+	auto* ui = whoami(o);
+	ui->m_pDoc->enableFindEdge = TRUE;
+	ui->m_pDoc->m_EPaintWidth = ui->m_pDoc->m_nWidth;
+	ui->m_pDoc->m_EPaintHeight = ui->m_pDoc->m_nHeight;
+	delete ui->customFilter;
+	ui->customFilter = new CustomFilter(ui->getDocument(), 3);
+	ui->m_pDoc->smooth = nullptr;
+	
+	float* temp = new float[9]{ 1.0f/16.0f,2.0f/16.0f,1.0f/16.0f,2.0f/16.0f,4.0f/16.0f,2.0f/16.0f,1.0f/16.0f,2.0f/16.0f,1.0f/16.0f };//gaussian fliter 
+	ui->customFilter->parseWeights(temp);
+	ui->customFilter->applyFilter();
+	ui->m_pDoc->smooth = ui->m_pDoc->m_EPainting;
+	ui->m_pDoc->m_EPainting = nullptr;
+	
+	delete[] temp;
+	
+
+	temp = new float[9]{ -1.0f,0,1.0f,-2.0f,0,2.0f,-1.0f,0,1.0f };//Sx fpr Sobel operator
+	ui->customFilter->parseWeights(temp);
+	ui->customFilter->applyFilter();
+	unsigned char* Gx= ui->m_pDoc->m_EPainting;
+	ui->m_pDoc->m_EPainting = nullptr;
+
+	delete[] temp;
+	temp = new float[9]{1.0f,2.0f,1.0f,0,0,0,-1.0f,-2.0f,-1.0f};//Sy fpr Sobel operator
+	ui->customFilter->parseWeights(temp);
+	ui->customFilter->applyFilter();
+	unsigned char* Gy = ui->m_pDoc->m_EPainting;
+	ui->m_pDoc->m_EPainting = nullptr;
+
+	ui->m_pDoc->constructEdgeImage(Gx, Gy);
+	delete[] Gx;
+	delete[] Gy;
+	delete[] temp;
+	delete[] ui->m_pDoc->smooth;
+	ui->m_pDoc->smooth = nullptr;
+	ui->m_pDoc->enableFindEdge = FALSE;
+}
+
+void ImpressionistUI::cb_displayOri(Fl_Menu_* o, void* v) {
+	auto* ui = whoami(o);
+	if (ui->m_pDoc->m_ucBitmap == nullptr) return;
+	ui->m_origView->setDisplay(0);
+	ui->m_origView->refresh();
+}
+
+void ImpressionistUI::cb_displayEdge(Fl_Menu_* o, void* v) {
+	auto* ui = whoami(o);
+	if (ui->m_pDoc->m_EPainting == nullptr) return;
+	ui->m_origView->setDisplay(1);
+	ui->m_origView->refresh();
+}
+
+void ImpressionistUI::cb_displayGra(Fl_Menu_* o, void* v) {
+	auto* ui = whoami(o);
+	if (ui->m_pDoc->m_GPainting == nullptr) return;
+	ui->m_origView->setDisplay(2);
+	ui->m_origView->refresh();
+}
+
 void ImpressionistUI::cb_colors(Fl_Menu_* o, void* v)
 {
 	whoami(o)->m_colorDialog->show();
@@ -661,20 +726,25 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{ "&Brushes...",	FL_ALT + 'b', (Fl_Callback *)ImpressionistUI::cb_brushes }, 
 		{ "&Clear Canvas", FL_ALT + 'c', (Fl_Callback *)ImpressionistUI::cb_clear_canvas, 0, FL_MENU_DIVIDER },
 
-		{"&Colors", FL_ALT+'c', (Fl_Callback *)ImpressionistUI::cb_colors, nullptr, FL_MENU_DIVIDER},
+		{"&Colors", FL_ALT+'r', (Fl_Callback *)ImpressionistUI::cb_colors, nullptr, FL_MENU_DIVIDER},
 		{"&Dissolve", FL_ALT+'d', (Fl_Callback *)ImpressionistUI::cb_dissolve},
 		{"&New Mural Image", FL_ALT+'n', (Fl_Callback *)ImpressionistUI::cb_newMural},
-		{"Custom Filter", 0, (Fl_Callback *)ImpressionistUI::cb_showCustomFilter},
-		{"Load Alpha Map", 0, (Fl_Callback *)ImpressionistUI::cb_loadAlphaMap, nullptr, FL_MENU_DIVIDER},
+		{"&Custom Filter", 0, (Fl_Callback *)ImpressionistUI::cb_showCustomFilter},
+		{"&Load Alpha Map", 0, (Fl_Callback *)ImpressionistUI::cb_loadAlphaMap, nullptr, FL_MENU_DIVIDER},
 
-		{"Load Gradient Map", 0,(Fl_Callback*)ImpressionistUI::cb_loadGradientMap},
-		{"Load Edge Map", 0,(Fl_Callback*)ImpressionistUI::cb_loadEdgeMap},
+		{"&Load Gradient Map", 0,(Fl_Callback*)ImpressionistUI::cb_loadGradientMap},
+		{"&Load Edge Map", 0,(Fl_Callback*)ImpressionistUI::cb_loadEdgeMap},
 
 		{"&Painterly", FL_ALT+'p', (Fl_Callback *)ImpressionistUI::cb_painterly},
 		{"&Matting", FL_ALT+'m', (Fl_Callback *)ImpressionistUI::cb_showMattingDialog, nullptr, FL_MENU_DIVIDER},
 	
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
+	{"&Display",0, 0, 0, FL_SUBMENU},
+		{"&Qriginal Image",FL_ALT+'o',(Fl_Callback*)ImpressionistUI::cb_displayOri},
+		{"&Edge Image",FL_ALT + 'e',(Fl_Callback*)ImpressionistUI::cb_displayEdge},
+		{"&Gradient Image",FL_ALT + 'g',(Fl_Callback*)ImpressionistUI::cb_displayGra},
+		{0},
 
 	{ "&Help",		0, 0, 0, FL_SUBMENU },
 		{ "&About",	FL_ALT + 'a', (Fl_Callback *)ImpressionistUI::cb_about },
@@ -755,7 +825,7 @@ ImpressionistUI::ImpressionistUI() {
 	
 
 	// brush dialog definition
-	m_brushDialog = new Fl_Window(400, 400, "Brush Dialog");
+	m_brushDialog = new Fl_Window(400, 440, "Brush Dialog");
 		// Add a brush type choice to the dialog
 		m_BrushTypeChoice = new Fl_Choice(50,10,150,25,"&Brush");
 		m_BrushTypeChoice->user_data((void*)(this));	// record self to be used by static callback functions
@@ -877,7 +947,13 @@ ImpressionistUI::ImpressionistUI() {
 		m_autoPaint->user_data((void*)this);
 		m_autoPaint->callback(cb_autoPaint);
 
+		m_edgeThresholdSlider = makeSlider(10, 400, 150, 20, "edge Threshold", 0, 500, 1);
+		m_edgeThresholdSlider->value(edgeThreshold);
+		m_edgeThresholdSlider->callback(cb_edgeThreshold);
 
+		m_findEdge = new Fl_Button(300, 400, 80, 20, "Find Edge");
+		m_findEdge->user_data((void*)this);
+		m_findEdge->callback(cb_findEdge);
 
     m_brushDialog->end();
 

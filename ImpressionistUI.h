@@ -62,6 +62,10 @@ public:
 	//Edge clipping
 	Fl_Light_Button*	m_edgeClip;
 
+	//Find edge
+	Fl_Slider*			m_edgeThresholdSlider;
+	Fl_Button*			m_findEdge;
+
 	// Painterly sliders
 	Fl_Slider* p_thresholdSlider;
 	Fl_Slider* p_layerSlider;
@@ -150,6 +154,8 @@ public:
 	double pJitterR{0.0}, pJitterG{0.0}, pJitterB{0.0};
 	double pJitterH{0.0}, pJitterS{0.0}, pJitterV{0.0};
 
+	int edgeThreshold{ 200 };
+
 	Painterly* painterly{nullptr};
 
 	CustomFilter* customFilter{nullptr};
@@ -201,6 +207,10 @@ private:
 	static void cb_swapCanvasAndOrigin(Fl_Widget* o, void* v);
 	static void cb_undo(Fl_Widget* o, void* v);
 
+	static void	cb_displayOri(Fl_Menu_* o, void* v);
+	static void	cb_displayEdge(Fl_Menu_* o, void* v);
+	static void	cb_displayGra(Fl_Menu_* o, void* v);
+
 	static void cb_space(Fl_Widget* o, void* v);
 	static void cb_sizeRand(Fl_Widget* o, void* v);
 	static void cb_autoPaint(Fl_Widget* o, void* v);
@@ -210,6 +220,9 @@ private:
 
 	static void cb_loadEdgeMap(Fl_Menu_* o, void* v);
 	static void cb_edgeClip(Fl_Widget* o, void* v);
+	
+	static void cb_edgeThreshold(Fl_Widget* o, void* v);
+	static void cb_findEdge(Fl_Widget* o, void* v);
 	
 	static void cb_colors(Fl_Menu_* o, void* v);
 	static void cb_colorChooser(Fl_Widget* o, void* v);

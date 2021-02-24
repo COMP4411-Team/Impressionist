@@ -150,6 +150,14 @@ int ImpressionistDoc::loadImage(char *iname)
 	// release old storage
 	if ( m_ucBitmap ) delete [] m_ucBitmap;
 	if ( m_ucPainting ) delete [] m_ucPainting;
+	if (m_EPainting) {
+		delete[] m_EPainting;
+		m_EPainting = nullptr;
+	}
+	if (m_GPainting) {
+		delete[] m_GPainting;
+		m_GPainting = nullptr;
+	}
 
 	m_ucBitmap		= data;
 
@@ -165,6 +173,7 @@ int ImpressionistDoc::loadImage(char *iname)
 
 	// display it on origView
 	m_pUI->m_origView->resizeWindow(width, height);	
+	m_pUI->m_origView->setDisplay(0);
 	m_pUI->m_origView->refresh();
 
 	// refresh paint view as well
@@ -326,6 +335,35 @@ int ImpressionistDoc::loadEdgeImage(char* iname) {
 	return 1;
 }
 
+//Construct the Edge Image.
+void ImpressionistDoc::constructEdgeImage(unsigned char* Gx, unsigned char* Gy) {
+	if (m_EPainting != nullptr) {
+		delete[]m_EPainting;
+	}
+	m_EPainting = new unsigned char[m_EPaintWidth * m_EPaintHeight * 3];
+	for (int i = 0; i < m_EPaintWidth; i++) {
+		for (int j = 0; j < m_EPaintHeight; j++) {
+			auto* colorx= (GLubyte*)(Gx + 3 * (j * m_EPaintWidth + i));
+			auto* colory = (GLubyte*)(Gy + 3 * (j * m_EPaintWidth + i));
+			auto greyx = 0.299 * colorx[0] + 0.587 * colorx[1] + 0.114 * colorx[2];
+			auto greyy = 0.299 * colory[0] + 0.587 * colory[1] + 0.114 * colory[2];
+			double magnitude = sqrt(greyx * greyx + greyy * greyy);
+			GLubyte* Ecolor = nullptr;
+			//colorx[0] += 128;
+			//colorx[1] += 128;
+			//colorx[2] += 128;
+			if (magnitude < m_pUI->edgeThreshold) Ecolor = new GLubyte[3]{ 0,0,0 };
+			else Ecolor = new GLubyte[3]{ 255,255,255 };
+			//auto c = (GLubyte)(min(magnitude, 255));
+			//Ecolor = new GLubyte[3]{ c,c,c };
+			memcpy(m_EPainting + (j * m_EPaintWidth + i) * 3,Ecolor, 3);
+			delete[] Ecolor;
+		}
+	}
+	m_pUI->m_origView->setDisplay(1);
+	m_pUI->m_origView->refresh();
+}
+
 
 //----------------------------------------------------------------
 // Save the specified image
@@ -455,6 +493,30 @@ GLubyte* ImpressionistDoc::GetGradientPixel(int x, int y) {
 GLubyte* ImpressionistDoc::GetGradientPixel(const Point p)
 {
 	return GetGradientPixel(p.x, p.y);
+}
+
+//------------------------------------------------------------------
+// Get the color of the pixel in the smooth image at coord x and y
+//------------------------------------------------------------------
+GLubyte* ImpressionistDoc::GetSmoothPixel(int x, int y) {
+	if (x < 0)
+		x = 0;
+	else if (x >= m_nWidth)
+		x = m_nWidth - 1;
+
+	if (y < 0)
+		y = 0;
+	else if (y >= m_nHeight)
+		y = m_nHeight - 1;
+
+	return (GLubyte*)(smooth + 3 * (y * m_EPaintWidth + x));
+}
+//----------------------------------------------------------------
+// Get the color of the pixel in the smooth image at point p
+//----------------------------------------------------------------
+GLubyte* ImpressionistDoc::GetSmoothPixel(const Point p)
+{
+	return GetSmoothPixel(p.x, p.y);
 }
 
 void ImpressionistDoc::writePixel(int x, int y, GLubyte* pixel)

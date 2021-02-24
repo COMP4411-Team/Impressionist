@@ -15,6 +15,7 @@ public:
 	~CustomFilter();
 	
 	bool parseWeights(std::string raw);
+	bool parseWeights(float* raw);
 	void normalize();
 	std::string getParsedWeights();
 

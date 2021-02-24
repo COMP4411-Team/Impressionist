@@ -42,7 +42,7 @@ public:
 	int getAngle();
 	double getAlpha();
 	char* getImageName();					// get the current image name
-
+	void constructEdgeImage(unsigned char* Gx, unsigned char* Gy);//draw edge image
 
 // Attributes
 public:
@@ -64,7 +64,7 @@ public:
 	unsigned char* m_background{ nullptr };
 	unsigned char* m_GPainting{ nullptr };// painting of another Gradient;
 	unsigned char* m_EPainting{ nullptr };//edge painting;
-
+	unsigned char* smooth{ nullptr };//The smoothed painting when find edge.
 	// Stroke direction
 	StrokeDirection m_strokeDirection{ StrokeDirection::SLIDER };
 
@@ -82,6 +82,8 @@ public:
 	
 	bool enableEdgeClip = FALSE;//whether use edge clipping.
 
+	bool enableFindEdge = FALSE;
+
 // Operations
 public:
 	// Get the color of the original picture at the specified coord
@@ -96,6 +98,10 @@ public:
 	GLubyte* GetEdgePixel(int x, int y);
 	// Get the color of the Edge Picture	
 	GLubyte* GetEdgePixel(const Point p);
+	//Get the color of the smoothed Picture
+	GLubyte* GetSmoothPixel(int x, int y);
+	// Get the color of the smoothed Picture	
+	GLubyte* GetSmoothPixel(const Point p);
 
 	GLubyte* getCanvasPixel(int x, int y);
 

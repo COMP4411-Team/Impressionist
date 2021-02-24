@@ -65,8 +65,19 @@ void OriginalView::draw()
 		if ( startrow < 0 ) 
 			startrow = 0;
 
-
-		bitstart = m_pDoc->m_ucBitmap + 3 * ((m_pDoc->m_nWidth * startrow) + scrollpos.x);
+		switch (image) {
+		case DisplayImage::ORIGINAL: 
+			if(m_pDoc->m_ucBitmap!=nullptr)bitstart = m_pDoc->m_ucBitmap + 3 * ((m_pDoc->m_nWidth * startrow) + scrollpos.x);
+			break;
+		case DisplayImage::EDGE:
+			if (m_pDoc->m_EPainting != nullptr)bitstart = m_pDoc->m_EPainting + 3 * ((m_pDoc->m_nWidth * startrow) + scrollpos.x);
+			break;
+		case DisplayImage::GRADIENT:
+			if (m_pDoc->m_GPainting != nullptr)bitstart = m_pDoc->m_GPainting + 3 * ((m_pDoc->m_nWidth * startrow) + scrollpos.x);
+			break;
+		default: break;
+		}
+		
 
 		// just copy image to GLwindow conceptually
 		glRasterPos2i( 0, m_nWindowHeight - drawHeight );
@@ -116,4 +127,8 @@ void OriginalView::setIndicator(const Point point)
 		indicator.y = 0;
 	else if (indicator.y >= m_nWindowHeight)
 		indicator.y = m_nWindowHeight - 1;
+}
+
+void OriginalView::setDisplay(int input) {
+	image = static_cast<DisplayImage>(input);
 }

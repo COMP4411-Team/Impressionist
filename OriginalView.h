@@ -18,6 +18,12 @@
 
 #include "ImpBrush.h"
 
+enum class DisplayImage {
+	ORIGINAL = 0,
+	EDGE,
+	GRADIENT
+};
+
 class ImpressionistDoc;
 
 class OriginalView : public Fl_Gl_Window
@@ -29,6 +35,8 @@ public:
 	void refresh();
 
 	void resizeWindow(int width, int height);
+
+	void setDisplay(int input);
 
 	// Draw the indicator in original view
 	void drawIndicator();
@@ -42,6 +50,7 @@ private:
 		m_nWindowHeight;
 
 	Point indicator{0, 0};
+	DisplayImage image{ DisplayImage::ORIGINAL };
 };
 
 #endif

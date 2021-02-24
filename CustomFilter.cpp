@@ -43,6 +43,15 @@ bool CustomFilter::parseWeights(std::string raw)
 	return true;
 }
 
+bool CustomFilter::parseWeights(float* raw) {
+	for (int i = size - 1; i >= 0; --i)
+		for (int j = 0; j < size; ++j)
+		{
+			filter[i][j]=raw[size*i+j];
+		}
+	return true;
+}
+
 void CustomFilter::normalize()
 {
 	float sum = 0.f;
@@ -79,25 +88,42 @@ void CustomFilter::convolution(int x, int y)
 {
 	float sum[3] = {0.f, 0.f, 0.f};
 	for (int i = 0; i < size; ++i)
-		for (int j = 0; j < size; ++j)
-		{
-			auto* color = doc->GetOriginalPixel(j + x - size/2, i + y - size/2);
+		for (int j = 0; j < size; ++j){
+			GLubyte* color = nullptr;
+			if (doc->enableFindEdge && doc->smooth != nullptr) {
+				color = doc->GetSmoothPixel(j + x - size / 2, i + y - size / 2);
+			}
+			else {
+				color = doc->GetOriginalPixel(j + x - size / 2, i + y - size / 2);
+			}
 			sum[0] += color[0] * filter[i][j];
 			sum[1] += color[1] * filter[i][j];
 			sum[2] += color[2] * filter[i][j];
 		}
 	clamp(sum);
-	auto* target = doc->m_ucPainting + (y * width + x) * 3;
-	target[0] = static_cast<unsigned char>(sum[0]);
-	target[1] = static_cast<unsigned char>(sum[1]);
-	target[2] = static_cast<unsigned char>(sum[2]);
+	if (doc->enableFindEdge) {
+		if (doc->m_EPainting == nullptr) doc->m_EPainting = new unsigned char[width * height * 3];
+		doc->m_EPaintHeight = height;
+		doc->m_EPaintWidth = width;
+		auto* target = doc->m_EPainting + (y * width + x) * 3;
+		target[0] = static_cast<unsigned char>(sum[0]);
+		target[1] = static_cast<unsigned char>(sum[1]);
+		target[2] = static_cast<unsigned char>(sum[2]);
+
+	}
+	else {
+		auto* target = doc->m_ucPainting + (y * width + x) * 3;
+		target[0] = static_cast<unsigned char>(sum[0]);
+		target[1] = static_cast<unsigned char>(sum[1]);
+		target[2] = static_cast<unsigned char>(sum[2]);
+	}
 }
 
 void CustomFilter::clamp(float* color)
 {
 	for (int i = 0; i < 3; ++i)
 	{
-		color[i] = min(color[i], 255.f);
+		color[i] = min(color[i], 255.f); 
 		color[i] = max(color[i], 0.f);
 	}
 }
