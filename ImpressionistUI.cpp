@@ -12,6 +12,7 @@
 #include "impressionistUI.h"
 #include "impressionistDoc.h"
 #include "BayesianMatting.h"
+#include "KnnMatting.h"
 
 using Preset = Painterly::Preset;
 
@@ -670,7 +671,7 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{"Load Edge Map", 0,(Fl_Callback*)ImpressionistUI::cb_loadEdgeMap},
 
 		{"&Painterly", FL_ALT+'p', (Fl_Callback *)ImpressionistUI::cb_painterly},
-		{"Bayesian Matting", 0, (Fl_Callback *)ImpressionistUI::cb_showMattingDialog, nullptr, FL_MENU_DIVIDER},
+		{"&Matting", FL_ALT+'m', (Fl_Callback *)ImpressionistUI::cb_showMattingDialog, nullptr, FL_MENU_DIVIDER},
 	
 		{ "&Quit",			FL_ALT + 'q', (Fl_Callback *)ImpressionistUI::cb_exit },
 		{ 0 },
@@ -974,7 +975,7 @@ ImpressionistUI::ImpressionistUI() {
 
 
 	// Bayesian matting
-	mattingDialog = new Fl_Window(500, 300, "Bayesian Matting");
+	mattingDialog = new Fl_Window(500, 300, "Matting");
 	mattingDialog->user_data(this);
 
 	fgBrush = new Fl_Button(30, 100, 150, 25, "Annotate Foreground");
@@ -985,9 +986,13 @@ ImpressionistUI::ImpressionistUI() {
 	bgBrush->user_data(this);
 	bgBrush->callback(cb_bgBrush);
 
-	runMatting = new Fl_Button(30, 190, 150, 25, "Run Bayesian Matting");
-	runMatting->user_data(this);
-	runMatting->callback(cb_runMatting);
+	runBayessianMatting = new Fl_Button(30, 190, 150, 25, "Run Bayesian Matting");
+	runBayessianMatting->user_data(this);
+	runBayessianMatting->callback(cb_runBayessianMatting);
+
+	runKnnMatting = new Fl_Button(30, 225, 150, 25, "Run KNN Matting");
+	runKnnMatting->user_data(this);
+	runKnnMatting->callback(cb_runKnnMatting);
 
 	mattingProgress = new Fl_Progress(200, 190, 280, 25, "Progress");
 	mattingProgress->maximum(100.f);
@@ -1126,10 +1131,16 @@ void ImpressionistUI::cb_bgBrush(Fl_Widget* o, void* v)
 	color[0] = color[1] = color[2] = 0;
 }
 
-void ImpressionistUI::cb_runMatting(Fl_Widget* o, void* v)
+void ImpressionistUI::cb_runBayessianMatting(Fl_Widget* o, void* v)
 {
 	BayesianMatting predictor(whoami(o)->getDocument());
 	predictor.predict();
+}
+
+void ImpressionistUI::cb_runKnnMatting(Fl_Widget* o, void* v)
+{
+	KnnMatting predictor(whoami(o)->getDocument());
+	predictor.runMatting(10, 100);
 }
 
 void ImpressionistUI::cb_exitMatting(Fl_Window* o, void* v)

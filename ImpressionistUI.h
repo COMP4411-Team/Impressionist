@@ -99,7 +99,8 @@ public:
 	Fl_Button* clearCanvas;
 	Fl_Button* fgBrush;
 	Fl_Button* bgBrush;
-	Fl_Button* runMatting;
+	Fl_Button* runBayessianMatting;
+	Fl_Button* runKnnMatting;
 	Fl_Progress* mattingProgress;
 
 	// Custom filter
@@ -242,7 +243,8 @@ private:
 	static void cb_showMattingDialog(Fl_Menu_* o, void* v);
 	static void cb_fgBrush(Fl_Widget* o, void* v);
 	static void cb_bgBrush(Fl_Widget* o, void* v);
-	static void cb_runMatting(Fl_Widget* o, void* v);
+	static void cb_runBayessianMatting(Fl_Widget* o, void* v);
+	static void cb_runKnnMatting(Fl_Widget* o, void* v);
 	static void cb_exitMatting(Fl_Window* o, void* v);
 
 	// Custom filter
