@@ -9,7 +9,7 @@
 
 #include <FL/Fl.H>
 #include <FL/Fl_Window.H>
-#include <FL/fl_file_chooser.H>		// FLTK file chooser
+#include <FL/Fl_File_Chooser.H>		// FLTK file chooser
 #include <FL/Fl_Menu_Bar.H>
 #include <FL/Fl_Value_Slider.H>
 #include <FL/Fl_Choice.H>
@@ -18,8 +18,8 @@
 #include <FL/Fl_Color_Chooser.H>
 #include <FL/Fl_Progress.H>
 #include <FL/Fl_Multiline_Input.H>
-#include <Fl/Fl_Multiline_Output.H>
-#include <Fl/Fl_Value_Input.H>;
+#include <FL/Fl_Multiline_Output.H>
+#include <FL/Fl_Value_Input.H>
 
 #include "Impressionist.h"
 #include "OriginalView.h"

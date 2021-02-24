@@ -20,6 +20,7 @@ enum
 	BRUSH_SCATTERED_CIRCLES,
 	BRUSH_SHARPENING,
 	BRUSH_ALPHA_MAP,
+	BRUSH_WARP,
 	NUM_BRUSH_TYPE // Make sure this stays at the end!
 };
 

@@ -7,8 +7,8 @@
 #ifndef ImpressionistDoc_h
 #define ImpressionistDoc_h
 
-#include "impressionist.h"
-#include "bitmap.h"
+#include "Impressionist.h"
+#include "Bitmap.h"
 
 enum class StrokeDirection
 {
@@ -96,6 +96,8 @@ public:
 	GLubyte* GetEdgePixel(int x, int y);
 	// Get the color of the Edge Picture	
 	GLubyte* GetEdgePixel(const Point p);
+
+	GLubyte* getCanvasPixel(int x, int y);
 
 	// Draw a pixel on the canvas
 	void writePixel(int x, int y, GLubyte* pixel);

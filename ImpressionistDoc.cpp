@@ -21,6 +21,7 @@
 #include "ScatterCircleBrush.h"
 #include "SharpeningBrush.h"
 #include "AlphaMappedBrush.h"
+#include "WarpBrush.h"
 
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
 
@@ -59,6 +60,7 @@ ImpressionistDoc::ImpressionistDoc()
 		= new ScatterCircleBrush( this, "Scattered Circles" );
 	ImpBrush::c_pBrushes[BRUSH_SHARPENING] = new SharpeningBrush(this, "Sharpening");
 	ImpBrush::c_pBrushes[BRUSH_ALPHA_MAP] = new AlphaMappedBrush(this, "Alpha Mapped Brush");
+	ImpBrush::c_pBrushes[BRUSH_WARP] = new WarpBrush(this, "Warp Brush");
 
 	// make one of the brushes current
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[0];
@@ -414,6 +416,21 @@ GLubyte* ImpressionistDoc::GetEdgePixel(int x, int y) {
 GLubyte* ImpressionistDoc::GetEdgePixel(const Point p)
 {
 	return GetEdgePixel(p.x, p.y);
+}
+
+GLubyte* ImpressionistDoc::getCanvasPixel(int x, int y)
+{
+	if (x < 0)
+		x = 0;
+	else if (x >= m_nPaintWidth)
+		x = m_nPaintWidth - 1;
+
+	if (y < 0)
+		y = 0;
+	else if (y >= m_nPaintHeight)
+		y = m_nPaintHeight - 1;
+
+	return (GLubyte*)(m_ucPainting + 3 * (y * m_nPaintWidth + x));
 }
 
 //------------------------------------------------------------------

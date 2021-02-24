@@ -78,6 +78,9 @@
     <ClCompile Include="KnnMatting.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="WarpBrush.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bitmap.h">
@@ -141,6 +144,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="KnnMatting.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="WarpBrush.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
