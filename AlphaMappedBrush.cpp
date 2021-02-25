@@ -58,22 +58,20 @@ void AlphaMappedBrush::BrushMove( const Point source, const Point target )
 			for (int j = 0; j < width; ++j)
 			{
 				memcpy(color, pDoc->GetOriginalPixel(source), 3);
-				pDoc->m_pUI->setRgbScale(alphaMap[(i * width + j) * 3], alphaMap[(i * width + j) * 3 + 1], alphaMap[(i * width + j) * 3 + 2]);
-				const double* rgbScale = pDoc->m_pUI->getRgbScale();
-
+				auto* paint = pDoc->getCanvasPixel(x + j, y + i);
+				// pDoc->m_pUI->setRgbScale(alphaMap[(i * width + j) * 3], alphaMap[(i * width + j) * 3 + 1], alphaMap[(i * width + j) * 3 + 2]);
+				// const double* rgbScale = pDoc->m_pUI->getRgbScale();
+				auto* map = alphaMap + (i * width + j) * 3;
 				for (int k = 0; k < 3; ++k) {
-					color[k] *= rgbScale[k];
-					if (color[k]) {
-						int m = 0;
-					}
+					color[k] = color[k] * map[k] + paint[k] * (1 - map[k]);
 				}
 
-				color[3] = GLubyte(pDoc->getAlpha()*225);
+				color[3] = 255;
 				glColor4ubv(color);
 				glVertex2d(x + j, y + i);
 			}
 		}
-		pDoc->m_pUI->setRgbScale(1.0f, 1.0f, 1.0f);
+		// pDoc->m_pUI->setRgbScale(1.0f, 1.0f, 1.0f);
 	glEnd();
 }
 

@@ -18,9 +18,9 @@ B RGB scale					yes	NOTE: is under file->color. Different from what prof mention
 B blur/sharp brush					yes	NOTE: only sharpening
 B 1 level undo					yes
 B dissolve						yes	NOTE: is under file->dissolve, alpha setting under file->dissolve setting
-BW fade in/out input on output canvas			yes
+BW fade in/out input on output canvas			yes	NOTE: is in the brush settings
 BW mural (blending)				yes
-BW alpha brush					yes
+BW alpha brush					yes	NOTE: if no alpha map is loaded, will use a random generated one (looks even better)
 BW automatic paint whole image			yes
 BW gradient from user-specified image			yes
 BW edge clipping					yes
@@ -29,12 +29,14 @@ BW edge clipping					yes
 2B multiresolution					yes	NOTE: changing presets will not reflect on the slider value, but they do change
 							           also there
 
-2B warp brush					yes	NOTE: try swiftly holding and dragging the cursor for best effect
+2B warp brush					yes	NOTE: first automatically paint the whole image, then use warp brush
+							           try swiftly holding and dragging the cursor for best effect, larger brush size is better
+
 2B curved brush following image gradient		yes	NOTE: brush size 2 or 3 will achieve best visual result
 4B mosaic					yes	NOTE: thumbnails under image/thumbnails, only 10x10px bmp will be accepted, need more than 100 thumbnails as input
 4B impressionist video with temporal coherency		no
 8B Bayesian matting				yes	NOTE: output in alpha matte, better result please check KNN matting
-*Extra KNN matting						CAVEAT: also under file->matting, ***please switch to release mode and enable O2 optimization for best performance***
+*Extra KNN matting						CAVEAT: also under file->matting, ***PLEASE switch to RELEASE mode and enable O2 optimization for best performance***
 
 Matting usage: click "annotate foreground" and try to fill as much "groundtruth" foreground as possible, same for "annotate background"
 We don't use grey as the uncertain region for the trimap, anything other than black and white will be the uncertain part
