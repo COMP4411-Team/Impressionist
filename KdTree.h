@@ -33,7 +33,7 @@ public:
 		friend bool operator<(const Pair& a, const Pair& b) { return a.distance > b.distance; }
 	};
 
-	KdTree(std::vector<Data>& points);
+	KdTree(std::vector<Data>& points, int dimension);
 
 	~KdTree();
 	
@@ -51,5 +51,7 @@ private:
 	std::priority_queue<Pair> knn;
 
 	Node* root{nullptr};
+
+	int totDim;
 };
 

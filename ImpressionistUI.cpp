@@ -13,6 +13,8 @@
 #include "impressionistDoc.h"
 #include "BayesianMatting.h"
 #include "KnnMatting.h"
+#include <vector>
+#include <string>
 
 using Preset = Painterly::Preset;
 
@@ -754,6 +756,7 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 		{"&Load Gradient Map", 0,(Fl_Callback*)ImpressionistUI::cb_loadGradientMap},
 		{"&Load Edge Map", 0,(Fl_Callback*)ImpressionistUI::cb_loadEdgeMap},
 
+		{"Mosaic", 0, (Fl_Callback *)ImpressionistUI::cb_showMosaicDialog},
 		{"&Painterly", FL_ALT+'p', (Fl_Callback *)ImpressionistUI::cb_painterly},
 		{"&Matting", FL_ALT+'m', (Fl_Callback *)ImpressionistUI::cb_showMattingDialog, nullptr, FL_MENU_DIVIDER},
 	
@@ -1133,6 +1136,21 @@ ImpressionistUI::ImpressionistUI() {
 	filterSizeInput->value(3);
 	filterSizeInput->minimum(1);
 	filterSizeInput->step(1);
+
+	filterDialog->end();
+	
+	// Mosaic
+	mosaicDialog = new Fl_Window(320, 250, "Mosaic");
+
+	loadThumbnails = new Fl_Button(30, 30, 120, 25, "Load Thumbnails");
+	loadThumbnails->user_data(this);
+	loadThumbnails->callback(cb_loadThumbnails);
+
+	buildMosaic = new Fl_Button(170, 30, 120, 25, "Build Mosaic");
+	buildMosaic->user_data(this);
+	buildMosaic->callback(cb_buildMosaic);
+
+	mosaicDialog->end();
 }
 
 void ImpressionistUI::cb_pThreshold(Fl_Widget* o, void* v)
@@ -1291,5 +1309,30 @@ void ImpressionistUI::cb_setFilter(Fl_Widget* o, void* v)
 		return;
 	}
 	ui->filterView->value(ui->customFilter->getParsedWeights().c_str());
+}
+
+void ImpressionistUI::cb_showMosaicDialog(Fl_Menu_* o, void* v)
+{
+	whoami(o)->mosaicDialog->show();
+}
+
+void ImpressionistUI::cb_loadThumbnails(Fl_Widget* o, void* v)
+{
+	auto* ui = whoami(o);
+	if (ui->mosaicMaker == nullptr)
+		ui->mosaicMaker = new MosaicMaker(ui->getDocument());
+
+	auto* str = fl_dir_chooser("Choose multiple bmp files", ".", 1);
+	if (str == nullptr) return;
+	if (!ui->mosaicMaker->loadThumbnails(std::string(str)))
+		fl_alert("Failed to load thumbnails");
+}
+
+void ImpressionistUI::cb_buildMosaic(Fl_Widget* o, void* v)
+{
+	auto* ui = whoami(o);
+	if (!ui->mosaicMaker->generate(0.7))
+		fl_alert("Please load >= 100 thumbnails, samples are under image/thumbnails, only 10x10px size will be accepted");
+	ui->m_paintView->refresh();
 }
 

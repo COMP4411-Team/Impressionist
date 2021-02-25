@@ -50,7 +50,7 @@ void KdTree::traverse(Eigen::VectorXd& point, Node* cur)
 	}
 }
 
-KdTree::KdTree(std::vector<Data>& points): points(points)
+KdTree::KdTree(std::vector<Data>& points, int dimension): points(points), totDim(dimension)
 {
 	root = build(0, points.size(), 0);
 }
@@ -64,7 +64,7 @@ KdTree::Node* KdTree::build(int l, int r, int dimension)
 {
 	if (l >= r)	return nullptr;
 	Node* cur = new Node(getMedian(l, r, dimension), dimension);
-	cur->left = build(l, (l + r) / 2, (dimension + 1) % 5);
-	cur->right = build((l + r) / 2 + 1, r, (dimension + 1) % 5);
+	cur->left = build(l, (l + r) / 2, (dimension + 1) % totDim);
+	cur->right = build((l + r) / 2 + 1, r, (dimension + 1) % totDim);
 	return cur;
 }

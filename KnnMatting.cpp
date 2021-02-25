@@ -40,7 +40,7 @@ void KnnMatting::runMatting(int k, int lambda)
 	doc->m_pUI->mattingProgress->label("step 1/4: construct kd-tree");
 	Fl::check();
 	
-	KdTree kdtree(featureVec);
+	KdTree kdtree(featureVec, 5);
 
 	doc->m_pUI->mattingProgress->value(25);
 	doc->m_pUI->mattingProgress->label("step 2/4: calculate knn");

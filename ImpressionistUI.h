@@ -20,6 +20,7 @@
 #include <FL/Fl_Multiline_Input.H>
 #include <FL/Fl_Multiline_Output.H>
 #include <FL/Fl_Value_Input.H>
+#include <FL/Fl_Native_File_Chooser.H>
 
 #include "Impressionist.h"
 #include "OriginalView.h"
@@ -28,6 +29,7 @@
 #include "ImpBrush.h"
 #include "Painterly.h"
 #include "CustomFilter.h"
+#include "MosaicMaker.h"
 
 class ImpressionistUI {
 public:
@@ -120,6 +122,11 @@ public:
 	Fl_Button* setFilter;
 	Fl_Value_Input* filterSizeInput;
 
+	// Mosaic
+	Fl_Window* mosaicDialog;
+	Fl_Button* loadThumbnails;
+	Fl_Button* buildMosaic;
+
 	// Member functions
 	void				setDocument(ImpressionistDoc* doc);
 	ImpressionistDoc*	getDocument();
@@ -164,6 +171,8 @@ public:
 	Painterly* painterly{nullptr};
 
 	CustomFilter* customFilter{nullptr};
+
+	MosaicMaker* mosaicMaker{nullptr};
 
 private:
 	ImpressionistDoc*	m_pDoc;		// pointer to document to communicate with the document
@@ -273,6 +282,11 @@ private:
 	static void cb_filterNormalize(Fl_Widget* o, void* v);
 	static void cb_applyFilter(Fl_Widget* o, void* v);
 	static void cb_setFilter(Fl_Widget* o, void* v);
+
+	// Mosaic
+	static void cb_showMosaicDialog(Fl_Menu_* o, void* v);
+	static void cb_loadThumbnails(Fl_Widget* o, void* v);
+	static void cb_buildMosaic(Fl_Widget* o, void* v);
 };
 
 #endif

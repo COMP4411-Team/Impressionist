@@ -153,6 +153,7 @@
     <ClCompile Include="KdTree.cpp" />
     <ClCompile Include="KnnMatting.cpp" />
     <ClCompile Include="LineBrush.cpp" />
+    <ClCompile Include="MosaicMaker.cpp" />
     <ClCompile Include="OriginalView.cpp" />
     <ClCompile Include="Painterly.cpp" />
     <ClCompile Include="PaintView.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="KdTree.h" />
     <ClInclude Include="KnnMatting.h" />
     <ClInclude Include="LineBrush.h" />
+    <ClInclude Include="MosaicMaker.h" />
     <ClInclude Include="OriginalView.h" />
     <ClInclude Include="Painterly.h" />
     <ClInclude Include="PaintView.h" />
