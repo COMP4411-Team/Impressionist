@@ -3,9 +3,8 @@ Impressionist Bells and Whistles checklist for grading
 
 HKUST login(s): bhuai, hqinac
 
-Delete yes/no when appropriate			
-
 All but the video are finished
+About libraries: we used Eigen, the path should already be included in the project settings. If not, please include ./eigen3
 
 W per new brush					yes	NOTE: not sure whether or not new brushes in the following bells can be double-counted :)
 W border clipping					yes
