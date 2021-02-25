@@ -93,6 +93,10 @@ public:
 	Fl_Color_Chooser* m_colorChooser;
 	Fl_Window* m_painterly;
 
+	//window for dissolve transparance setting.
+	Fl_Window* m_dissolveSet;
+	Fl_Slider* m_alphaDissolve;
+
 	// Painterly
 	Fl_Choice* m_pPresetChoice;
 	Fl_Choice* m_pBrushChoice;
@@ -138,6 +142,7 @@ public:
 	void setAlpha(double alpha);
 
 	double* getRgbScale();
+	void setRgbScale(float rscale,float gscale, float bscale);
 
 	double getTransparency();
 	double getDissolveAlpha();
@@ -168,7 +173,7 @@ private:
 	int m_nWidth;
 	int m_nAngle;
 	double m_nAlpha;
-	int		m_nSpacing;
+	int		m_nSpacing{ 4 };
 
 	double m_rgbScale[3] = {1.0, 1.0, 1.0};	// for color blending, each between 0 and 1
 
@@ -228,6 +233,9 @@ private:
 	static void cb_colorChooser(Fl_Widget* o, void* v);
 
 	static void cb_dissolve(Fl_Menu_* o, void* v);
+	static void cb_setDissolve(Fl_Menu_* o, void* v);
+	static void cb_dissolveAlpha(Fl_Widget* o, void* v);
+
 	static void cb_newMural(Fl_Menu_* o, void* v);
 	static void cb_loadAlphaMap(Fl_Menu_* o, void* v);
 

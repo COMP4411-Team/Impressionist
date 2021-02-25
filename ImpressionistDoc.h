@@ -42,7 +42,7 @@ public:
 	int getAngle();
 	double getAlpha();
 	char* getImageName();					// get the current image name
-	void constructEdgeImage(unsigned char* Gx, unsigned char* Gy);//draw edge image
+	void constructEdgeImage(float* Gx, float* Gy);//draw edge image
 
 // Attributes
 public:
@@ -65,6 +65,7 @@ public:
 	unsigned char* m_GPainting{ nullptr };// painting of another Gradient;
 	unsigned char* m_EPainting{ nullptr };//edge painting;
 	unsigned char* smooth{ nullptr };//The smoothed painting when find edge.
+	float* G{ nullptr };
 	// Stroke direction
 	StrokeDirection m_strokeDirection{ StrokeDirection::SLIDER };
 
@@ -83,6 +84,7 @@ public:
 	bool enableEdgeClip = FALSE;//whether use edge clipping.
 
 	bool enableFindEdge = FALSE;
+	bool drawGmaps = FALSE;
 
 // Operations
 public:

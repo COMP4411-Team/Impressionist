@@ -222,14 +222,18 @@ int ImpressionistDoc::loadAlphaMap(char* name)
 		return 0;
 	}
 
-	float* map = new float [width * height];
-	for (int i = 0; i < height; ++i)
+	
+	float* map = new float [width * height*3];
+	for (int i = 0; i < height; ++i) {
 		for (int j = 0; j < width; ++j)
 		{
 			int index = (i * width + j) * 3;
-			float greyScale = (data[index] * 0.299f + data[index + 1] * 0.587f + data[index + 2] * 0.114f);
-			map[i * width + j] = (255.f - greyScale) / 255.f;
+			map[index] = data[index] / 255.0f;
+			map[index + 1] = data[index + 1] / 255.0f;
+			map[index + 2] = data[index + 2] / 255.0f;
 		}
+	}
+	
 
 	((AlphaMappedBrush*)(ImpBrush::c_pBrushes[BRUSH_ALPHA_MAP]))->setAlphaMap(map, height, width);
 
@@ -336,26 +340,28 @@ int ImpressionistDoc::loadEdgeImage(char* iname) {
 }
 
 //Construct the Edge Image.
-void ImpressionistDoc::constructEdgeImage(unsigned char* Gx, unsigned char* Gy) {
+void ImpressionistDoc::constructEdgeImage(float* Gx, float* Gy) {
 	if (m_EPainting != nullptr) {
 		delete[]m_EPainting;
 	}
 	m_EPainting = new unsigned char[m_EPaintWidth * m_EPaintHeight * 3];
 	for (int i = 0; i < m_EPaintWidth; i++) {
 		for (int j = 0; j < m_EPaintHeight; j++) {
-			auto* colorx= (GLubyte*)(Gx + 3 * (j * m_EPaintWidth + i));
-			auto* colory = (GLubyte*)(Gy + 3 * (j * m_EPaintWidth + i));
+			auto* colorx= Gx + 3 * (j * m_EPaintWidth + i);
+			auto* colory = Gy + 3 * (j * m_EPaintWidth + i);
 			auto greyx = 0.299 * colorx[0] + 0.587 * colorx[1] + 0.114 * colorx[2];
 			auto greyy = 0.299 * colory[0] + 0.587 * colory[1] + 0.114 * colory[2];
 			double magnitude = sqrt(greyx * greyx + greyy * greyy);
 			GLubyte* Ecolor = nullptr;
-			//colorx[0] += 128;
-			//colorx[1] += 128;
-			//colorx[2] += 128;
+			//colory[0] += 128;
+			//colory[1] += 128;
+			//colory[2] += 128;
 			if (magnitude < m_pUI->edgeThreshold) Ecolor = new GLubyte[3]{ 0,0,0 };
-			else Ecolor = new GLubyte[3]{ 255,255,255 };
-			//auto c = (GLubyte)(min(magnitude, 255));
-			//Ecolor = new GLubyte[3]{ c,c,c };
+			//else Ecolor = new GLubyte[3]{ 255,255,255 };
+			else {
+				auto c = (GLubyte)(min(magnitude, 255));
+				Ecolor = new GLubyte[3]{ c,c,c };
+			}
 			memcpy(m_EPainting + (j * m_EPaintWidth + i) * 3,Ecolor, 3);
 			delete[] Ecolor;
 		}

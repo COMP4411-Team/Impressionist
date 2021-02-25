@@ -420,6 +420,7 @@ void ImpressionistUI::cb_findEdge(Fl_Widget* o, void* v) {
 	ui->m_pDoc->enableFindEdge = TRUE;
 	ui->m_pDoc->m_EPaintWidth = ui->m_pDoc->m_nWidth;
 	ui->m_pDoc->m_EPaintHeight = ui->m_pDoc->m_nHeight;
+	ui->m_pDoc->G = new float[ui->m_pDoc->m_EPaintWidth * ui->m_pDoc->m_EPaintHeight * 3];
 	delete ui->customFilter;
 	ui->customFilter = new CustomFilter(ui->getDocument(), 3);
 	ui->m_pDoc->smooth = nullptr;
@@ -432,19 +433,20 @@ void ImpressionistUI::cb_findEdge(Fl_Widget* o, void* v) {
 	
 	delete[] temp;
 	
-
-	temp = new float[9]{ -1.0f,0,1.0f,-2.0f,0,2.0f,-1.0f,0,1.0f };//Sx fpr Sobel operator
+	ui->m_pDoc->drawGmaps = TRUE;
+	temp = new float[9]{ -1.0f,0,1.0f,-2.0f,0,2.0f,-1.0f,0,1.0f };//Sx for Sobel operator
 	ui->customFilter->parseWeights(temp);
 	ui->customFilter->applyFilter();
-	unsigned char* Gx= ui->m_pDoc->m_EPainting;
-	ui->m_pDoc->m_EPainting = nullptr;
+	float* Gx = ui->m_pDoc->G;
+	ui->m_pDoc->G = nullptr;
+	ui->m_pDoc->G = new float[ui->m_pDoc->m_EPaintWidth * ui->m_pDoc->m_EPaintHeight * 3];
 
 	delete[] temp;
-	temp = new float[9]{1.0f,2.0f,1.0f,0,0,0,-1.0f,-2.0f,-1.0f};//Sy fpr Sobel operator
+	temp = new float[9]{1.0f,2.0f,1.0f,0,0,0,-1.0f,-2.0f,-1.0f};//Sy for Sobel operator
 	ui->customFilter->parseWeights(temp);
 	ui->customFilter->applyFilter();
-	unsigned char* Gy = ui->m_pDoc->m_EPainting;
-	ui->m_pDoc->m_EPainting = nullptr;
+	float* Gy = ui->m_pDoc->G;
+	ui->m_pDoc->G = nullptr;
 
 	ui->m_pDoc->constructEdgeImage(Gx, Gy);
 	delete[] Gx;
@@ -452,6 +454,7 @@ void ImpressionistUI::cb_findEdge(Fl_Widget* o, void* v) {
 	delete[] temp;
 	delete[] ui->m_pDoc->smooth;
 	ui->m_pDoc->smooth = nullptr;
+	ui->m_pDoc->drawGmaps = FALSE;
 	ui->m_pDoc->enableFindEdge = FALSE;
 }
 
@@ -500,6 +503,14 @@ void ImpressionistUI::cb_dissolve(Fl_Menu_* o, void* v)
 		pDoc->dissolveImage(newfile);
 	}
 	
+}
+
+void ImpressionistUI::cb_setDissolve(Fl_Menu_* o, void* v) {
+	whoami(o)->m_dissolveSet->show();
+}
+
+void ImpressionistUI::cb_dissolveAlpha(Fl_Widget* o, void* v) {
+	((ImpressionistUI*)(o->user_data()))->m_dissolveAlpha = double(((Fl_Slider*)o)->value());
 }
 
 void ImpressionistUI::cb_newMural(Fl_Menu_* o, void* v)
@@ -708,6 +719,13 @@ double* ImpressionistUI::getRgbScale()
 	return m_rgbScale;
 }
 
+void ImpressionistUI::setRgbScale(float rscale,float gscale, float bscale)
+{
+	m_rgbScale[0] = rscale;
+	m_rgbScale[1] = gscale;
+	m_rgbScale[2] = bscale;
+}
+
 double ImpressionistUI::getTransparency()
 {
 	return m_transparency;
@@ -728,6 +746,7 @@ Fl_Menu_Item ImpressionistUI::menuitems[] = {
 
 		{"&Colors", FL_ALT+'r', (Fl_Callback *)ImpressionistUI::cb_colors, nullptr, FL_MENU_DIVIDER},
 		{"&Dissolve", FL_ALT+'d', (Fl_Callback *)ImpressionistUI::cb_dissolve},
+		{"&Dissolve Setting", FL_ALT + 'd', (Fl_Callback*)ImpressionistUI::cb_setDissolve},
 		{"&New Mural Image", FL_ALT+'n', (Fl_Callback *)ImpressionistUI::cb_newMural},
 		{"&Custom Filter", 0, (Fl_Callback *)ImpressionistUI::cb_showCustomFilter},
 		{"&Load Alpha Map", 0, (Fl_Callback *)ImpressionistUI::cb_loadAlphaMap, nullptr, FL_MENU_DIVIDER},
@@ -957,6 +976,16 @@ ImpressionistUI::ImpressionistUI() {
 
     m_brushDialog->end();
 
+	//dissolveSet
+	m_dissolveSet = new Fl_Window(300, 40, "Dissolve Set");
+
+	m_alphaDissolve = makeSlider(10, 10, 150, 20, "dissolve Alpha", 0.0, 1.0, 0.01);
+	m_alphaDissolve->value(m_dissolveAlpha);
+	m_alphaDissolve->callback(cb_dissolveAlpha);
+
+	m_dissolveSet->end();
+
+
 	// Color chooser for color blending
 	m_colorDialog = new Fl_Window(200, 240, "Colors");
 	
@@ -976,14 +1005,14 @@ ImpressionistUI::ImpressionistUI() {
 	m_pPresetChoice->callback(cb_painterlyPresets);
 
 	
-	m_pBrushChoice = new Fl_Choice(113, 45, 150, 25, "Stroke");
+	m_pBrushChoice = new Fl_Choice(300, 10, 200, 25, "Stroke");
 	m_pBrushChoice->user_data((void*)(this));
 	m_pBrushChoice->menu(strokeDirectionMenu);
 	m_pBrushChoice->callback(cb_strokeChoice);
 	m_pBrushChoice->deactivate();
 	
 
-	runPainterly = new Fl_Button(300,10,50,25,"Run");
+	runPainterly = new Fl_Button(540,10,50,25,"Run");
 	runPainterly->user_data((void*)(this));
 	runPainterly->callback(cb_runPainterly);
 

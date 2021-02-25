@@ -96,22 +96,34 @@ void CustomFilter::convolution(int x, int y)
 			else {
 				color = doc->GetOriginalPixel(j + x - size / 2, i + y - size / 2);
 			}
-			sum[0] += color[0] * filter[i][j];
-			sum[1] += color[1] * filter[i][j];
-			sum[2] += color[2] * filter[i][j];
+			sum[0] += static_cast<float>(color[0]) * filter[i][j];
+			sum[1] += static_cast<float>(color[1]) * filter[i][j];
+			sum[2] += static_cast<float>(color[2]) * filter[i][j];
+			if (sum[0] > 0){ 
+				int m =  1; 
+			}
 		}
-	clamp(sum);
+	
 	if (doc->enableFindEdge) {
 		if (doc->m_EPainting == nullptr) doc->m_EPainting = new unsigned char[width * height * 3];
 		doc->m_EPaintHeight = height;
 		doc->m_EPaintWidth = width;
-		auto* target = doc->m_EPainting + (y * width + x) * 3;
-		target[0] = static_cast<unsigned char>(sum[0]);
-		target[1] = static_cast<unsigned char>(sum[1]);
-		target[2] = static_cast<unsigned char>(sum[2]);
-
+		if (doc->drawGmaps) {
+			auto* target = doc->G + (y * width + x) * 3;
+			target[0] = sum[0];
+			target[1] = sum[1];
+			target[2] = sum[2];
+		}
+		else {
+			clamp(sum);
+			auto* target = doc->m_EPainting + (y * width + x) * 3;
+			target[0] = static_cast<unsigned char>(sum[0]);
+			target[1] = static_cast<unsigned char>(sum[1]);
+			target[2] = static_cast<unsigned char>(sum[2]);
+		}
 	}
 	else {
+		clamp(sum);
 		auto* target = doc->m_ucPainting + (y * width + x) * 3;
 		target[0] = static_cast<unsigned char>(sum[0]);
 		target[1] = static_cast<unsigned char>(sum[1]);
