@@ -22,7 +22,10 @@ BW fade in/out input on output canvas			yes	NOTE: is in the brush settings
 BW mural (blending)				yes
 BW alpha brush					yes	NOTE: if no alpha map is loaded, will use a random generated one (looks even better)
 BW automatic paint whole image			yes
-BW gradient from user-specified image			yes
+BW gradient from user-specified image			yes	NOTE:For the light button anotherGradient, please first use file->load Gradient Map to load the map for another Gradient,
+                                                                                                                          or the light button will automatically call it( if gradient map = nullptr). similarly, for the light button edge clipping, 
+                                                                                                                          you can use both file->load Edge Image and edge detection, edge detection will save the edge image automatically.
+                                                                                                                          If Edge image==nullptr, the light button will call load edge Image.
 BW edge clipping					yes
 2B user-specified kernel				yes
 2B edge detection + user-specified edge clipping		yes
