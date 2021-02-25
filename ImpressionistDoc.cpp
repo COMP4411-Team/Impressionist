@@ -239,7 +239,6 @@ int ImpressionistDoc::loadAlphaMap(char* name)
 }
 
 
-
 // Maintain the dimension of the original image
 // image with different dimension will be aligned to top-left corner
 int ImpressionistDoc::dissolveImage(char *name) 

@@ -9,6 +9,7 @@
 
 #include "Impressionist.h"
 #include "Bitmap.h"
+#include "KdTree.h"
 
 enum class StrokeDirection
 {
@@ -116,6 +117,9 @@ public:
 
 	int loadGradientImage(char* name);//Load the image for another Gradient
 	int loadEdgeImage(char* name); //Load the image for edge painting.
+
+	// Generate kd tree from thumbnails
+	void constructKDTree();
 
 private:
 	char			m_imageName[256];
