@@ -125,6 +125,27 @@ Painterly::Stroke* Painterly::makeSplineStroke(unsigned char* ref, int x, int y,
 	return stroke;
 }
 
+void Painterly::syncWithUi()
+{
+	auto* ui = doc->m_pUI;
+	ui->p_thresholdSlider->value(threshold);
+	ui->p_layerSlider->value(layer);
+	ui->p_minSizeSlider->value(brushMinSize);
+	ui->p_curvatureSlider->value(curvature);
+	ui->p_opacitySlider->value(alpha);
+	ui->p_BlurSlider->value(blurFactor);
+	ui->p_minSizeSlider->value(minLen);
+	ui->p_maxLenSlider->value(maxLen);
+	ui->p_gridSizeSlider->value(gridSizeFactor);
+
+	ui->p_jitterBSlider->value(jitterB);
+	ui->p_jitterRSlider->value(jitterR);
+	ui->p_jitterGSlider->value(jitterG);
+	ui->p_jitterVSlider->value(jitterV);
+	ui->p_jitterHSlider->value(jitterH);
+	ui->p_jitterSSlider->value(jitterS);
+}
+
 void Painterly::renderStrokes(std::vector<Stroke*> strokes, float* zBuffer)
 {
 	for (auto* stroke : strokes)

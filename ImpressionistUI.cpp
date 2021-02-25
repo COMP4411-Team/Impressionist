@@ -586,6 +586,8 @@ void ImpressionistUI::cb_painterlyPresets(Fl_Widget* o, void* v)
 	ui->pJitterH = painterly->jitterH;
 	ui->pJitterS = painterly->jitterS;
 	ui->pJitterV = painterly->jitterV;
+
+	painterly->syncWithUi();
 }
 
 void ImpressionistUI::cb_runPainterly(Fl_Widget* o, void* v)

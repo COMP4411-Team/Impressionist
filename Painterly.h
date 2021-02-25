@@ -59,6 +59,8 @@ public:
 	void paintLayer(unsigned char* ref, int size);
 	Stroke* makeSplineStroke(unsigned char* ref, int x, int y, int size);
 
+	void syncWithUi();
+
 	ImpressionistDoc* doc;
 
 	int layer;				// number of layers
