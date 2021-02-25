@@ -26,8 +26,9 @@ class ImpressionistDoc;
 class Painterly
 {
 	// Tired of adding mutator, just made attributes public
-public:
+	friend class CurvedBrush;
 
+public:
 	enum class Preset
 	{
 		IMPRESSIONIST,

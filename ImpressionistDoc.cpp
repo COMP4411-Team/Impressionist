@@ -22,6 +22,7 @@
 #include "SharpeningBrush.h"
 #include "AlphaMappedBrush.h"
 #include "WarpBrush.h"
+#include "CurvedBrush.h"
 
 #define DESTROY(p)	{  if ((p)!=NULL) {delete [] p; p=NULL; } }
 
@@ -61,6 +62,7 @@ ImpressionistDoc::ImpressionistDoc()
 	ImpBrush::c_pBrushes[BRUSH_SHARPENING] = new SharpeningBrush(this, "Sharpening");
 	ImpBrush::c_pBrushes[BRUSH_ALPHA_MAP] = new AlphaMappedBrush(this, "Alpha Mapped Brush");
 	ImpBrush::c_pBrushes[BRUSH_WARP] = new WarpBrush(this, "Warp Brush");
+	ImpBrush::c_pBrushes[BRUSH_CURVED] = new CurvedBrush(this, "Curved Brush");
 
 	// make one of the brushes current
 	m_pCurrentBrush	= ImpBrush::c_pBrushes[0];

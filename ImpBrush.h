@@ -21,6 +21,7 @@ enum
 	BRUSH_SHARPENING,
 	BRUSH_ALPHA_MAP,
 	BRUSH_WARP,
+	BRUSH_CURVED,
 	NUM_BRUSH_TYPE // Make sure this stays at the end!
 };
 

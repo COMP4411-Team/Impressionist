@@ -145,6 +145,7 @@
     <ClCompile Include="Bitmap.cpp" />
     <ClCompile Include="BSplines.cpp" />
     <ClCompile Include="CircleBrush.cpp" />
+    <ClCompile Include="CurvedBrush.cpp" />
     <ClCompile Include="CustomFilter.cpp" />
     <ClCompile Include="ImpBrush.cpp" />
     <ClCompile Include="Impressionist.cpp" />
@@ -170,6 +171,7 @@
     <ClInclude Include="bitmap.h" />
     <ClInclude Include="BSplines.h" />
     <ClInclude Include="CircleBrush.h" />
+    <ClInclude Include="CurvedBrush.h" />
     <ClInclude Include="CustomFilter.h" />
     <ClInclude Include="ImpBrush.h" />
     <ClInclude Include="impressionist.h" />
